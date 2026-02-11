@@ -1,37 +1,38 @@
 姓名: 构建安卓安装包
+name: Build Android APK
 
-在……之上:
-推:
-分支机构: [主要的]
+on:
+  push:
+    branches: [ main ]
 
-工作:
-建立:
-连续的: Ubuntu-最新
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-步骤:
-    - 姓名: 签出代码
-uses: 操作/结帐@v4
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - 姓名: 设置Node.js
-uses: 操作/设置-节点@v4
-和……一起:
-节点版本: '20'
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-    - 姓名: 安装科尔多瓦
-跑: npm安装-g cordova
+    - name: Install Cordova
+      run: npm install -g cordova
 
-    - 姓名: 安装相依性
-跑: npm安装
+    - name: Install dependencies
+      run: npm install
 
-    - 姓名: 添加安卓平台
-跑: 科尔多瓦平台添加Android@latest
+    - name: Add Android platform
+      run: cordova platform add android@latest
 
-    - 姓名: 构建版本安装包
-跑: Cordova build android--发布
+    - name: Build release APK
+      run: cordova build android --release
 
-    - 姓名: 上传安装包
-uses: 操作/上载工件@v4
-和……一起:
-姓名: 冰月阁-apk
-路径: 平台/Android/app/build/outputs/apk/release/*.APK
-if-no-file-found: 误差
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: bingyuege-apk
+        path: platforms/android/app/build/outputs/apk/release/*.apk
+        if-no-files-found: error
