@@ -1,237 +1,669 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>冰阅阁</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background: #f8f9fa; color: #333; padding-bottom: 60px; }
-        
-        .header {
-            position: fixed; top: 0; left: 0; right: 0; height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; display: flex; align-items: center; padding: 0 16px; z-index: 999;
-        }
-        .header h1 { font-size: 18px; font-weight: 600; flex: 1; text-align: center; }
-        .header .back-btn { position: absolute; left: 16px; cursor: pointer; }
-        
-        .page { display: none; margin-top: 50px; padding: 16px; min-height: calc(100vh - 110px); }
-        .page.active { display: block; }
-        
-        .banner { height: 120px; background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; padding: 0 20px; color: #333; }
-        .section-title { font-size: 16px; font-weight: 600; margin: 12px 0; display: flex; justify-content: space-between; }
-        .section-title a { color: #667eea; font-size: 14px; text-decoration: none; }
-        .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .book-item { text-align: center; cursor: pointer; }
-        .book-cover { width: 100%; aspect-ratio: 3/4; background: #e9ecef; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
-        .book-cover img { width: 100%; height: 100%; object-fit: cover; }
-        .book-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .tabbar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
-            background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-around; align-items: center; z-index: 999;
-        }
-        .tab-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 12px; text-decoration: none; }
-        .tab-item.active { color: #667eea; }
-        .tab-item .icon { font-size: 20px; margin-bottom: 4px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>冰阅</title>
+  <style>
+    :root {
+      --primary: #2575fc;
+      --bg-light: #f5f5f5;
+      --card-light: #ffffff;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --border: #e0e0e0;
+    }
+    .dark-mode {
+      --primary: #4080ff;
+      --bg-light: #121212;
+      --card-light: #1e1e1e;
+      --text-primary: #e0e0e0;
+      --text-secondary: #9e9e9e;
+      --border: #333333;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+    body { 
+      background: var(--bg-light); 
+      color: var(--text-primary); 
+      padding-bottom: 60px;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    /* 核心布局 (保持不变) */
+    .top-bar {
+      position: fixed; top: 0; left: 0; width: 100%;
+      height: 50px; background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: bold;
+      z-index: 10;
+    }
+    .page {
+      margin-top: 60px; padding: 15px; display: none;
+      min-height: calc(100vh - 110px);
+    }
+    .page.active { display: block; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      height: 50px; background: var(--card-light); border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around; align-items: center;
+      z-index: 10;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 12px; color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item i { font-size: 20px; margin-bottom: 3px; }
 
-        .user-info { background: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
-        .user-info .avatar { width: 60px; height: 60px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px; }
-        .menu-list { background: white; border-radius: 12px; overflow: hidden; }
-        .menu-item { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333; }
-        .team-member { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .team-member .avatar { width: 48px; height: 48px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px; }
-        .member-info { flex: 1; }
-        .member-name { font-size: 15px; font-weight: 500; }
-        .member-role { font-size: 12px; color: #999; }
-        .contact-info { margin-top: 20px; padding: 16px; background: white; border-radius: 12px; }
-        .contact-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
-        .contact-label { color: #666; }
+    /* 通用组件 (保持不变) */
+    .card { 
+      background: var(--card-light); 
+      border-radius: 8px; 
+      padding: 15px; 
+      margin-bottom: 10px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 6px;
+      background: var(--primary); color: #fff; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .add-btn {
+      position: fixed; bottom: 70px; right: 20px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--primary); color: #fff; border: none;
+      font-size: 20px; cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center;
+      z-index: 99;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: var(--card-light); 
+      padding: 20px; border-radius: 8px;
+      width: 90%; max-width: 400px;
+      border: 1px solid var(--border);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-primary); }
+    .form-control {
+      width: 100%; padding: 10px; border: 1px solid var(--border);
+      border-radius: 4px; font-size: 16px;
+      background: var(--card-light);
+      color: var(--text-primary);
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .form-control::placeholder { color: var(--text-secondary); }
+    .source-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .source-item:hover { background: rgba(0,0,0,0.02); }
+    .toast {
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7); color: #fff;
+      padding: 8px 16px; border-radius: 20px;
+      display: none;
+      z-index: 999;
+    }
+    .toast.show { display: block; }
 
-        .reader-content { padding: 20px; line-height: 1.8; font-size: 16px; }
-        .reader-toolbar { display: flex; justify-content: space-around; padding: 10px; background: #f0f0f0; border-radius: 8px; margin-top: 20px; }
-        .reader-toolbar button { padding: 8px 16px; border: none; border-radius: 4px; background: #667eea; color: white; }
+    /* 加载中 (新增，复用原有逻辑) */
+    .loading {
+      text-align: center; padding: 40px 0; color: var(--text-secondary);
+    }
+    .loading::after {
+      content: ''; display: block; width: 30px; height: 30px; margin: 20px auto;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .source-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f0f0f0; background: white; margin-bottom: 8px; border-radius: 8px; }
-        .add-btn { position: fixed; bottom: 80px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-    </style>
+    /* 书籍与书架样式 (新增，保持风格统一) */
+    .book-item {
+      display: flex; gap: 10px; padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .book-cover {
+      width: 60px; height: 80px; background: #eee; border-radius: 4px;
+      overflow: hidden;
+    }
+    .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .book-info { flex: 1; }
+    .book-title { font-weight: bold; margin-bottom: 4px; }
+    .book-author, .book-progress { font-size: 12px; color: var(--text-secondary); }
+
+    /* 阅读器 (新增，保持交互习惯) */
+    .reader-page { padding: 20px; line-height: 1.8; font-size: 16px; }
+    .reader-content { margin-bottom: 60px; }
+    .reader-toolbar {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: rgba(0,0,0,0.7); color: #fff;
+      display: flex; justify-content: space-around; padding: 10px 0; z-index: 90;
+    }
+    .reader-tool {
+      display: flex; flex-direction: column; align-items: center; font-size: 12px; cursor: pointer;
+    }
+
+    /* 目录页 (新增) */
+    .catalog-page { padding: 0; }
+    .catalog-header {
+      padding: 15px; background: var(--primary); color: #fff;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .catalog-list {
+      padding: 15px; height: calc(100vh - 110px); overflow-y: auto;
+    }
+    .catalog-item {
+      padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .catalog-item.current { color: var(--primary); font-weight: bold; }
+
+    /* 更多功能样式 (保持不变) */
+    .setting-item {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .setting-item:last-child { border-bottom: none; }
+    .setting-desc {
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .toggle {
+      position: relative;
+      width: 44px; height: 22px;
+      background: var(--border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle.active { background: var(--primary); }
+    .toggle::after {
+      content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; top: 2px; left: 2px; transition: left 0.3s;
+    }
+    .toggle.active::after { left: 24px; }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <span class="back-btn" onclick="goBack()">←</span>
-        <h1 id="pageTitle">冰阅阁</h1>
+  <!-- 顶部导航 (保持不变) -->
+  <div class="top-bar">冰阅 · 书源管理</div>
+
+  <!-- 1. 书源管理页 (保持原有结构) -->
+  <div id="pageSource" class="page active">
+    <div class="card">
+      <h3 style="margin-bottom: 10px; font-size: 16px;">书源列表</h3>
+      <div id="sourceList"></div>
     </div>
+    <button class="add-btn" onclick="openModal()">+</button>
+  </div>
 
-    <div class="page active" id="shelfPage">
-        <div class="banner">
-            <div>
-                <h2>欢迎回来</h2>
-                <p>继续阅读你喜欢的小说</p>
-            </div>
-        </div>
-        <div class="section-title">
-            <span>我的书架</span>
-            <a href="#" onclick="goToPage('sourcePage')">书源管理</a>
-        </div>
-        <div class="book-grid">
-            <div class="book-item" onclick="goToPage('readerPage')">
-                <div class="book-cover"><img src="https://picsum.photos/200/260?random=1" alt="封面"></div>
-                <div class="book-title">斗破苍穹</div>
-            </div>
-            <div class="book-item" onclick="goToPage('readerPage')">
-                <div class="book-cover"><img src="https://picsum.photos/200/260?random=2" alt="封面"></div>
-                <div class="book-title">全职高手</div>
-            </div>
-            <div class="book-item" onclick="goToPage('readerPage')">
-                <div class="book-cover"><img src="https://picsum.photos/200/260?random=3" alt="封面"></div>
-                <div class="book-title">诡秘之主</div>
-            </div>
-        </div>
+  <!-- 2. 书架页 (功能升级：联动阅读进度) -->
+  <div id="pageShelf" class="page">
+    <div class="card">
+      <h3 style="font-size: 16px; margin-bottom: 15px;">我的书架</h3>
+      <div id="shelfList">
+        <p style="color: var(--text-secondary);">暂无书籍，去书源中添加吧</p>
+      </div>
     </div>
+  </div>
 
-    <div class="page" id="discoverPage">
-        <div class="section-title"><span>热门推荐</span><a href="#">更多</a></div>
-        <div class="book-grid">
-            <div class="book-item" onclick="goToPage('readerPage')">
-                <div class="book-cover"><img src="https://picsum.photos/200/260?random=4" alt="封面"></div>
-                <div class="book-title">全球高武</div>
-            </div>
-            <div class="book-item" onclick="goToPage('readerPage')">
-                <div class="book-cover"><img src="https://picsum.photos/200/260?random=5" alt="封面"></div>
-                <div class="book-title">我师兄实在太稳健了</div>
-            </div>
-        </div>
+  <!-- 3. 书籍列表页 (保持原有入口) -->
+  <div id="pageBooks" class="page">
+    <div class="card">
+      <h3 style="font-size: 16px; margin-bottom: 15px;">
+        <span id="sourceBookTitle">书源书籍</span>
+        <button class="btn btn-secondary" style="float: right; font-size: 12px;" onclick="switchPage('pageSource')">返回</button>
+      </h3>
+      <div id="bookList"></div>
     </div>
+  </div>
 
-    <div class="page" id="profilePage">
-        <div class="user-info">
-            <div class="avatar">👤</div>
-            <div class="user-name">冰阅阁用户</div>
-        </div>
-        <div class="menu-list">
-            <div class="menu-item" onclick="goToPage('sourcePage')">
-                <span>书源管理</span><span>→</span>
-            </div>
-            <div class="menu-item" onclick="alert('设置功能开发中')">
-                <span>阅读设置</span><span>→</span>
-            </div>
-            <div class="menu-item" onclick="showTeamInfo()">
-                <span>关于团队</span><span>→</span>
-            </div>
-        </div>
-
-        <div id="teamInfo" style="display:none; margin-top:20px;">
-            <div class="section-title"><span>开发团队</span></div>
-            <div class="team-member"><div class="avatar">冰</div><div class="member-info"><div class="member-name">冰郁泪</div><div class="member-role">核心开发</div></div></div>
-            <div class="team-member"><div class="avatar">晴</div><div class="member-info"><div class="member-name">晴宝</div><div class="member-role">UI设计</div></div></div>
-            <div class="team-member"><div class="avatar">叶</div><div class="member-info"><div class="member-name">叶青云</div><div class="member-role">产品经理</div></div></div>
-            <div class="team-member"><div class="avatar">枫</div><div class="member-info"><div class="member-name">枫叶</div><div class="member-role">后端开发</div></div></div>
-            
-            <div class="contact-info">
-                <div class="section-title"><span>联系我们</span></div>
-                <div class="contact-item"><span class="contact-label">私人联系</span><span>2326895769@qq.com</span></div>
-                <div class="contact-item"><span class="contact-label">私人工作</span><span>2414582386@qq.com</span></div>
-                <div class="contact-item"><span class="contact-label">团队开发</span><span>catgopii@gmail.com</span></div>
-            </div>
-        </div>
+  <!-- 4. 阅读器页 (新增：加入书架逻辑) -->
+  <div id="pageReader" class="page reader-page">
+    <div id="readerContent" class="reader-content"></div>
+    <div class="reader-toolbar">
+      <div class="reader-tool" onclick="prevChapter()">
+        <i>⬅️</i>
+        <span>上一章</span>
+      </div>
+      <div class="reader-tool" onclick="addToShelf()">
+        <i>📚</i>
+        <span>加入书架</span>
+      </div>
+      <div class="reader-tool" onclick="switchPage('pageCatalog')">
+        <i>☰</i>
+        <span>目录</span>
+      </div>
+      <div class="reader-tool" onclick="nextChapter()">
+        <i>➡️</i>
+        <span>下一章</span>
+      </div>
     </div>
+  </div>
 
-    <div class="page" id="readerPage">
-        <div class="reader-content">
-            <h3 style="text-align:center; margin-bottom:20px;">第一章 陨落的天才</h3>
-            <p>斗之气，三段！</p>
-            <p>望着测验魔石碑上面那清晰无比的四个大字，少年面无表情，唇角却有着一抹自嘲。</p>
-            <p>这已是他连续第三年参加成人测验，然而结果，却是一如既往的凄惨。</p>
-            <p>魔石碑旁，一位中年男子面无表情的看了眼石碑上的数字，又看了眼面前的少年，挥了挥手，不耐烦的道：“下一个，萧媚。”</p>
-            <p>少年默默的走下台，周围传来的一道道幸灾乐祸的议论声，如同针一般扎在他的心头。</p>
-            <p>“唉，又是三段，这废物还真是屡教不改啊。”</p>
-            <p>“谁让他三年前突然把斗气弄没了呢？现在能保持三段都算他努力了。”</p>
-        </div>
-        <div class="reader-toolbar">
-            <button onclick="adjustFont(-1)">A-</button>
-            <button onclick="toggleNight()">夜间</button>
-            <button onclick="adjustFont(1)">A+</button>
-        </div>
+  <!-- 5. 目录页 (新增) -->
+  <div id="pageCatalog" class="page catalog-page">
+    <div class="catalog-header">
+      <span id="catalogBookTitle">目录</span>
+      <button class="btn btn-secondary" style="font-size: 12px;" onclick="switchPage('pageReader')">返回</button>
     </div>
-
-    <div class="page" id="sourcePage">
-        <div class="section-title"><span>书源管理</span></div>
-        <div class="source-item">
-            <div>
-                <div>笔趣阁</div>
-                <div style="font-size:12px;color:#999;">https://example.com</div>
-            </div>
-            <input type="checkbox" checked>
-        </div>
-        <div class="source-item">
-            <div>
-                <div>起点中文</div>
-                <div style="font-size:12px;color:#999;">https://example.com</div>
-            </div>
-            <input type="checkbox">
-        </div>
-        <div class="add-btn" onclick="alert('添加书源功能开发中')">+</div>
+    <div id="catalogList" class="catalog-list">
+      <div class="loading">加载目录中...</div>
     </div>
+  </div>
 
-    <div class="tabbar">
-        <div class="tab-item active" onclick="switchTab('shelfPage', '冰阅阁')"><div class="icon">📚</div><span>书架</span></div>
-        <div class="tab-item" onclick="switchTab('discoverPage', '发现')"><div class="icon">🔍</div><span>发现</span></div>
-        <div class="tab-item" onclick="switchTab('profilePage', '我的')"><div class="icon">👤</div><span>我的</span></div>
+  <!-- 6. 更多页 (保持不变) -->
+  <div id="pageMore" class="page">
+    <div class="card">
+      <h3 style="font-size: 16px; margin-bottom: 15px;">系统设置</h3>
+      <div class="setting-item" onclick="toggleDarkMode()">
+        <span>夜间模式</span>
+        <div class="toggle" id="darkModeToggle"></div>
+      </div>
+      <div class="setting-item" onclick="clearCache()">
+        <span>清除缓存</span>
+        <span class="setting-desc">删除所有书源和书架数据</span>
+      </div>
     </div>
+  </div>
 
-    <script>
-        let currentPage = 'shelfPage';
-        let fontSize = 16;
-        let isNight = false;
+  <! -- 添加/编辑书源弹窗 (保持原有结构) -->
+  <div 身份标识="模态" 班级="模态">
+    <div 班级="模态内容">
+      <H3 身份标识="modalTitle" 风格="底边距: 15PX; 字体大小: 18PX;">添加书源</H3>
+      <输入 类型="隐藏" 身份标识="SourceID">
+      <div 班级="窗体组">
+        <标签>书源名称</标签>
+        <输入 类型="文本" 身份标识="SourceName" 班级="窗体控件" 占位符="例如：笔趣阁">
+      </div>
+      <div 班级="窗体组">
+        <标签>书源地址</标签>
+        <输入 类型="文本" 身份标识="sourceUrl" 班级="窗体控件" 占位符="https://xxx.com">
+      </div>
+      <div 风格="显示: 弯曲; 差距: 10PX; 上边距: 20PX;">
+        <按钮 班级="btn btn-二级" onClick="closeModal()">取消</按钮>
+        <按钮 班级="btn" onClick="saveSource()">保存</按钮>
+      </div>
+    </div>
+  </div>
 
-        function switchTab(pageId, title) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            event.currentTarget.classList.add('active');
-            document.getElementById('pageTitle').innerText = title;
-            currentPage = pageId;
-            document.querySelector('.back-btn').style.display = (['shelfPage','discoverPage','profilePage'].includes(pageId)) ? 'none' : 'block';
+  <! -- 提示框 (保持不变) -->
+  <div 身份标识="吐司" 班级="吐司"></div>
+
+  <! -- 底部导航 (保持不变) -->
+  <div 班级="底部导航">
+    <div 班级="导航项目" onClick="switchPage('pageShelf')">
+      <我>📚</我>
+      <跨度>书架</跨度>
+    </div>
+    <div 班级="导航项目已激活" onClick="switchPage('pageSource')">
+      <我>⚙️</我>
+      <跨度>书源</跨度>
+    </div>
+    <div 班级="导航项目" onClick="switchPage('pageMore')">
+      <我>☰</我>
+      <跨度>更多</跨度>
+    </div>
+  </div>
+
+  <脚本>
+    //=====================原有全局变量(保持不变)=====================
+    让 来源=JSON.解析(localStorage.getitem('来源')||'[]');
+    让 currentEditId=无效的;
+    让 isDarkMode=localStorage.getitem('darkMode')==='true';
+    让 currentSource=无效的;
+    让 currentBook=无效的;
+    让 currentChapters=[];
+    让 currentChapterIndex=0;
+
+    //=====================新增全局变量(联动核心)=====================
+    让 shelfBooks=JSON.解析(localStorage.getitem('shelfBooks')||'[]'); // 书架数据
+
+    //=====================初始化(保持原有逻辑+新增渲染)=====================
+    窗户.onload=功能() {
+      renderSources();    // 原有逻辑
+      renderShelf();      // 新增逻辑
+      initDarkMode();     // 原有逻辑
+    };
+
+    //=====================页面切换(保持原有逻辑，兼容新页面)=====================
+    功能 switchPage(pageId) {
+      文件.querySelectorAll('.page').foreach(页=>页.classList.移除('活动'));
+      文件.getElementById(pageId).classList.添加('活动');
+      
+      文件.querySelectorAll('.nav-item').foreach(项=>{
+        项.classList.移除('活动');
+        如果 (项.onClick.toString().包括(pageId)) {
+          项.classList.添加('活动');
         }
+      });
+      
+      // 标题联动 (新增页面支持)
+      Const 标题={
+        'pageSource': '冰阅 · 书源管理',
+        'pageShelf': '冰阅 · 我的书架',
+        'pageBooks': '冰阅 · 书籍列表',
+        'PageReader': '冰阅 · 阅读器',
+        'pageCatalog': '冰阅 · 章节列表',
+        'pageMore': '冰阅 · 更多功能'
+      };
+      文件.querySelector('.顶栏').内部文本=标题[pageId];
+    }
 
-        function goToPage(pageId, title) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            document.getElementById('pageTitle').innerText = title || (pageId === 'readerPage' ? '斗破苍穹' : '书源管理');
-            currentPage = pageId;
-            document.querySelector('.back-btn').style.display = 'block';
-        }
+    //=====================原有书源管理逻辑(完全保持不变)=====================
+    功能 renderSources() {
+      Const SourceList=文件.getElementById('SourceList');
+      如果 (来源.长度===0) {
+        SourceList.innerHTML='<p style="color:var(--text-secondary)；">暂无书源，点击右下角添加</p>';
+        return;
+      }
+      sourceList.innerHTML = '';
+      sources.forEach(source => {
+        const item = document.createElement('div');
+        item.className = 'source-item';
+        item.onclick = () => loadBooksFromSource(source); // 点击逻辑不变
+        item.innerHTML = `
+          <div>
+            <strong>${source.name}</strong>
+            <p style="font-size: 12px; color: var(--text-secondary);">${source.url}</p>
+          </div>
+          <div style="display: flex; gap: 5px;">
+            <button class="btn btn-secondary" onclick="event.stopPropagation(); editSource('${source.id}')">编辑</button>
+            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteSource('${source.id}')">删除</button>
+          </div>
+        `;
+        sourceList.appendChild(item);
+      });
+    }
 
-        function goBack() {
-            if (currentPage === 'readerPage' || currentPage === 'sourcePage') {
-                switchTab('shelfPage', '冰阅阁');
-            } else {
-                document.getElementById('teamInfo').style.display = 'none';
-            }
-        }
+    function openModal() { /* 保持不变 */
+      currentEditId = null;
+      document.getElementById('modalTitle').innerText = '添加书源';
+      document.getElementById('sourceId').value = '';
+      document.getElementById('sourceName').value = '';
+      document.getElementById('sourceUrl').value = '';
+      document.getElementById('modal').classList.add('show');
+    }
 
-        function showTeamInfo() {
-            document.getElementById('teamInfo').style.display = 'block';
-        }
+    function closeModal() { /* 保持不变 */
+      document.getElementById('modal').classList.remove('show');
+    }
 
-        function adjustFont(delta) {
-            fontSize = Math.max(14, Math.min(24, fontSize + delta));
-            document.querySelector('.reader-content').style.fontSize = fontSize + 'px';
-        }
+    function saveSource() { /* 保持不变 */
+      const id = document.getElementById('sourceId').value || Date.now().toString();
+      const name = document.getElementById('sourceName').value.trim();
+      const url = document.getElementById('sourceUrl').value.trim();
 
-        function toggleNight() {
-            isNight = !isNight;
-            const body = document.body;
-            if (isNight) {
-                body.style.background = '#1a1a1a';
-                body.style.color = '#ccc';
-            } else {
-                body.style.background = '#f8f9fa';
-                body.style.color = '#333';
-            }
+      if (!name || !url) {
+        showToast('请填写完整信息');
+        return;
+      }
+
+      if (currentEditId) {
+        sources = sources.map(s => s.id === currentEditId ? { id, name, url } : s);
+      } else {
+        sources.push({ id, name, url });
+      }
+
+      localStorage.setItem('sources', JSON.stringify(sources));
+      renderSources();
+      closeModal();
+      showToast('保存成功');
+    }
+
+    function editSource(id) { /* 保持不变 */
+      const source = sources.find(s => s.id === id);
+      if (!source) return;
+      currentEditId = id;
+      document.getElementById('modalTitle').innerText = '编辑书源';
+      document.getElementById('sourceId').value = source.id;
+      document.getElementById('sourceName').value = source.name;
+      document.getElementById('sourceUrl').value = source.url;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function deleteSource(id) { /* 保持不变 */
+      if (confirm('确定删除该书源吗？')) {
+        sources = sources.filter(s => s.id !== id);
+        localStorage.setItem('sources', JSON.stringify(sources));
+        renderSources();
+        showToast('删除成功');
+      }
+    }
+
+    // ===================== 原有书籍加载逻辑 (优化：支持真实点击) =====================
+    function loadBooksFromSource(source) {
+      currentSource = source;
+      document.getElementById('sourceBookTitle').innerText = `${source.name} - 书籍列表`;
+      
+      // 模拟数据结构保持不变，便于后续扩展
+      const mockBooks = [
+        { 
+          id: 'b1', 
+          title: '斗破苍穹', 
+          author: '天蚕土豆', 
+          cover: 'https://via.placeholder.com/60x80?text=斗破',
+          chapters: [
+            { id: 'c1', title: '第一章 陨落的天才', content: '少年望着测验魔石碑，上面清晰的镌刻着三个字：萧炎。\n\n等级：三段。\n\n望着这令人失望的成绩，少年自嘲的笑了笑。' },
+            { id: 'c2', title: '第二章 废柴与天才', content: '“唉，这孩子，真是可惜了。”\n\n“是啊，曾经是何等的天才，如今却是这般模样...”' }
+          ]
+        },
+        { 
+          id: 'b2', 
+          title: '斗罗大陆', 
+          author: '唐家三少', 
+          cover: 'https://via.placeholder.com/60x80?text=斗罗',
+          chapters: [
+            { id: 'c1', title: '第一章 穿越的唐家三少', content: '唐门外门弟子唐三，因偷学内门绝学为唐门所不容，跳崖明志时却发现没有死，反而穿越到了另一个世界。' }
+          ]
         }
-    </script>
+      ];
+
+      const bookList = document.getElementById('bookList');
+      bookList.innerHTML = '';
+      mockBooks.forEach(book => {
+        const item = document.createElement('div');
+        item.className = 'book-item';
+        // 修复：使用闭包确保点击时获取正确的book对象
+        item.onclick = (function(b) {
+          return function() {
+            openBook(b);
+          };
+        })(book);
+        item.innerHTML = `
+          <div class="book-cover">
+            <img src="${book.cover}" alt="${book.title}">
+          </div>
+          <div class="book-info">
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">作者：${book.author}</div>
+          </div>
+        `;
+        bookList.appendChild(item);
+      });
+
+      switchPage('pageBooks');
+    }
+
+    // ===================== 新增：书架联动核心功能 =====================
+    
+    /**
+     * 渲染书架
+     */
+    function renderShelf() {
+      const shelfList = document.getElementById('shelfList');
+      if (shelfBooks.length === 0) {
+        shelfList.innerHTML = '<p style="color: var(--text-secondary);">暂无书籍，去书源中添加吧</p>';
+        return;
+      }
+
+      shelfList.innerHTML = '';
+      shelfBooks.forEach(book => {
+        const item = document.createElement('div');
+        item.className = 'book-item';
+        item.onclick = () => openBookFromShelf(book);
+        item.innerHTML = `
+          <div class="book-cover">
+            <img src="${book.cover}" alt="${book.title}">
+          </div>
+          <div class="book-info">
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">作者：${book.author}</div>
+            <div class="book-progress">正在阅读：${book.lastChapterTitle}</div>
+          </div>
+        `;
+        shelfList.appendChild(item);
+      });
+    }
+
+    /**
+     * 加入书架 (与阅读器联动)
+     */
+    function addToShelf() {
+      if (!currentBook) return;
+
+      // 检查是否已在书架
+      const existIndex = shelfBooks.findIndex(b => b.id === currentBook.id);
+      
+      // 构建带进度的书架数据
+      const shelfBook = {
+        ...currentBook,
+        lastChapterIndex: currentChapterIndex,
+        lastChapterTitle: currentChapters[currentChapterIndex].title
+      };
+
+      if (existIndex > -1) {
+        // 更新进度
+        shelfBooks[existIndex] = shelfBook;
+        showToast('阅读进度已更新');
+      } else {
+        // 新增书籍
+        shelfBooks.push(shelfBook);
+        showToast('已加入书架');
+      }
+
+      // 持久化并刷新
+      localStorage.setItem('shelfBooks', JSON.stringify(shelfBooks));
+      renderShelf();
+    }
+
+    /**
+     * 从书架打开书籍 (恢复进度)
+     */
+    function openBookFromShelf(book) {
+      currentBook = book;
+      currentChapters = book.chapters;
+      // 关键联动：恢复上次阅读的章节
+      currentChapterIndex = book.lastChapterIndex || 0;
+      
+      // 直接加载目录和章节
+      renderCatalog();
+      loadChapter(currentChapterIndex);
+    }
+
+    // ===================== 阅读与目录逻辑 (优化联动) =====================
+    function openBook(book) {
+      currentBook = book;
+      currentChapters = book.chapters;
+      currentChapterIndex = 0;
+      
+      renderCatalog(); // 打开书籍时同时准备目录
+      loadChapter(0);
+    }
+
+    function renderCatalog() {
+      const catalogList = document.getElementById('catalogList');
+      document.getElementById('catalogBookTitle').innerText = currentBook.title;
+      
+      let html = '';
+      currentChapters.forEach((chapter, index) => {
+        html += `<div class="catalog-item ${index === currentChapterIndex ? 'current' : ''}" onclick="loadChapter(${index})">${chapter.title}</div>`;
+      });
+      
+      catalogList.innerHTML = html;
+    }
+
+    function loadChapter(index) {
+      if (index < 0 || index >= currentChapters.length) {
+        showToast(index < 0 ? '已是第一章' : '已是最后一章');
+返回；
+}
+
+currentChapterIndex=index；
+Const chapter=currentChapters[index]；
+      
+Const readerContent=document.getElementById('readerContent')；
+readerContent.innerHTML='
+        <H3 风格="文本对齐: 中心; 底边距: 20PX;">${chapter.title}</H3>
+        <p>${chapter.content.replace(/\n/g，'</p><p>')}</p>
+`;
+      
+// 联动更新目录高亮
+文件。querySelectorAll('.catalog-item').foreach((item，I)=>{
+item.classList.remove('current')；
+if(i===index)item.classList.add('current')；
+      });
+
+switchPage('pageReader')；
+    }
+
+函数prevChapter(){loadChapter(currentChapterIndex-1)；}
+函数nextchapter(){loadChapter(currentChapterIndex+1)；}
+
+//=====================工具函数(增强清除缓存)=====================
+函数initDarkMode(){/*保持不变*/
+if(isDarkMode){
+document.body.classList.add('深色模式')；
+文件。getElementById('darkModeToggle').classList。添加(“活动”)；
+      }
+    }
+
+函数toggleDarkMode(){/*保持不变*/
+isDarkMode=！isDarkMode；
+文件。身体。classList.Toggle('dark-mode'，isDarkMode)；
+文件。getElementById('darkModeToggle').classList。切换('active'，isDarkMode)；
+localStorage.setItem('深色模式'，isDarkMode)；
+showToast(isDarkMode？'已开启夜间模式'：'已关闭夜间模式')；
+    }
+
+函数clearCache(){/*增强：同时清除书架*/
+if(确认('警告：这将删除所有书源和书架数据，且无法恢复！ ')){
+localStorage.removeItem('sources')；
+localStorage.removeItem('shelfBooks')；//联动清除
+来源=[]；
+shelfBooks=[]；
+RenderSource()；
+renderShelf()；//联动刷新
+showToast('缓存已清除')；
+      }
+    }
+
+函数showToast(msg){/*保持不变*/
+Const toast=document.getElementById('toast')；
+toast.innerText=msg；
+toast.classList.add('show')；
+setTimeout(()=>{
+toast.classList.remove('show')；
+}, 2000);
+    }
+</脚本>
 </body>
 </html>
+
+
