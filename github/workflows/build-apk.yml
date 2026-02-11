@@ -1,0 +1,37 @@
+姓名: 构建安卓安装包
+
+在……之上:
+推:
+分支机构: [主要的]
+
+工作:
+建立:
+连续的: Ubuntu-最新
+
+步骤:
+    - 姓名: 签出代码
+uses: 操作/结帐@v4
+
+    - 姓名: 设置Node.js
+uses: 操作/设置-节点@v4
+和……一起:
+节点版本: '20'
+
+    - 姓名: 安装科尔多瓦
+跑: npm安装-g cordova
+
+    - 姓名: 安装相依性
+跑: npm安装
+
+    - 姓名: 添加安卓平台
+跑: 科尔多瓦平台添加Android@latest
+
+    - 姓名: 构建版本安装包
+跑: Cordova build android--发布
+
+    - 姓名: 上传安装包
+uses: 操作/上载工件@v4
+和……一起:
+姓名: 冰月阁-apk
+路径: 平台/Android/app/build/outputs/apk/release/*.APK
+if-no-file-found: 误差
