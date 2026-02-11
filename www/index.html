@@ -283,94 +283,94 @@
     </div>
   </div>
 
-  <! -- 添加/编辑书源弹窗 (保持原有结构) -->
-  <div 身份标识="模态" 班级="模态">
-    <div 班级="模态内容">
-      <H3 身份标识="modalTitle" 风格="底边距: 15PX; 字体大小: 18PX;">添加书源</H3>
-      <输入 类型="隐藏" 身份标识="SourceID">
-      <div 班级="窗体组">
-        <标签>书源名称</标签>
-        <输入 类型="文本" 身份标识="SourceName" 班级="窗体控件" 占位符="例如：笔趣阁">
+  <!-- 添加/编辑书源弹窗 (保持原有结构) -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle" style="margin-bottom: 15px; font-size: 18px;">添加书源</h3>
+      <input type="hidden" id="sourceId">
+      <div class="form-group">
+        <label>书源名称</label>
+        <input type="text" id="sourceName" class="form-control" placeholder="例如：笔趣阁">
       </div>
-      <div 班级="窗体组">
-        <标签>书源地址</标签>
-        <输入 类型="文本" 身份标识="sourceUrl" 班级="窗体控件" 占位符="https://xxx.com">
+      <div class="form-group">
+        <label>书源地址</label>
+        <input type="text" id="sourceUrl" class="form-control" placeholder="https://xxx.com">
       </div>
-      <div 风格="显示: 弯曲; 差距: 10PX; 上边距: 20PX;">
-        <按钮 班级="btn btn-二级" onClick="closeModal()">取消</按钮>
-        <按钮 班级="btn" onClick="saveSource()">保存</按钮>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn" onclick="saveSource()">保存</button>
       </div>
     </div>
   </div>
 
-  <! -- 提示框 (保持不变) -->
-  <div 身份标识="吐司" 班级="吐司"></div>
+  <!-- 提示框 (保持不变) -->
+  <div id="toast" class="toast"></div>
 
-  <! -- 底部导航 (保持不变) -->
-  <div 班级="底部导航">
-    <div 班级="导航项目" onClick="switchPage('pageShelf')">
-      <我>📚</我>
-      <跨度>书架</跨度>
+  <!-- 底部导航 (保持不变) -->
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="switchPage('pageShelf')">
+      <i>📚</i>
+      <span>书架</span>
     </div>
-    <div 班级="导航项目已激活" onClick="switchPage('pageSource')">
-      <我>⚙️</我>
-      <跨度>书源</跨度>
+    <div class="nav-item active" onclick="switchPage('pageSource')">
+      <i>⚙️</i>
+      <span>书源</span>
     </div>
-    <div 班级="导航项目" onClick="switchPage('pageMore')">
-      <我>☰</我>
-      <跨度>更多</跨度>
+    <div class="nav-item" onclick="switchPage('pageMore')">
+      <i>☰</i>
+      <span>更多</span>
     </div>
   </div>
 
-  <脚本>
-    //=====================原有全局变量(保持不变)=====================
-    让 来源=JSON.解析(localStorage.getitem('来源')||'[]');
-    让 currentEditId=无效的;
-    让 isDarkMode=localStorage.getitem('darkMode')==='true';
-    让 currentSource=无效的;
-    让 currentBook=无效的;
-    让 currentChapters=[];
-    让 currentChapterIndex=0;
+  <script>
+    // ===================== 原有全局变量 (保持不变) =====================
+    let sources = JSON.parse(localStorage.getItem('sources') || '[]');
+    let currentEditId = null;
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+    let currentSource = null;
+    let currentBook = null;
+    let currentChapters = [];
+    let currentChapterIndex = 0;
 
-    //=====================新增全局变量(联动核心)=====================
-    让 shelfBooks=JSON.解析(localStorage.getitem('shelfBooks')||'[]'); // 书架数据
+    // ===================== 新增全局变量 (联动核心) =====================
+    let shelfBooks = JSON.parse(localStorage.getItem('shelfBooks') || '[]'); // 书架数据
 
-    //=====================初始化(保持原有逻辑+新增渲染)=====================
-    窗户.onload=功能() {
+    // ===================== 初始化 (保持原有逻辑 + 新增渲染) =====================
+    window.onload = function() {
       renderSources();    // 原有逻辑
       renderShelf();      // 新增逻辑
       initDarkMode();     // 原有逻辑
     };
 
-    //=====================页面切换(保持原有逻辑，兼容新页面)=====================
-    功能 switchPage(pageId) {
-      文件.querySelectorAll('.page').foreach(页=>页.classList.移除('活动'));
-      文件.getElementById(pageId).classList.添加('活动');
+    // ===================== 页面切换 (保持原有逻辑，兼容新页面) =====================
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
       
-      文件.querySelectorAll('.nav-item').foreach(项=>{
-        项.classList.移除('活动');
-        如果 (项.onClick.toString().包括(pageId)) {
-          项.classList.添加('活动');
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.onclick.toString().includes(pageId)) {
+          item.classList.add('active');
         }
       });
       
       // 标题联动 (新增页面支持)
-      Const 标题={
+      const titles = {
         'pageSource': '冰阅 · 书源管理',
         'pageShelf': '冰阅 · 我的书架',
         'pageBooks': '冰阅 · 书籍列表',
-        'PageReader': '冰阅 · 阅读器',
+        'pageReader': '冰阅 · 阅读器',
         'pageCatalog': '冰阅 · 章节列表',
         'pageMore': '冰阅 · 更多功能'
       };
-      文件.querySelector('.顶栏').内部文本=标题[pageId];
+      document.querySelector('.top-bar').innerText = titles[pageId];
     }
 
-    //=====================原有书源管理逻辑(完全保持不变)=====================
-    功能 renderSources() {
-      Const SourceList=文件.getElementById('SourceList');
-      如果 (来源.长度===0) {
-        SourceList.innerHTML='<p style="color:var(--text-secondary)；">暂无书源，点击右下角添加</p>';
+    // ===================== 原有书源管理逻辑 (完全保持不变) =====================
+    function renderSources() {
+      const sourceList = document.getElementById('sourceList');
+      if (sources.length === 0) {
+        sourceList.innerHTML = '<p style="color: var(--text-secondary);">暂无书源，点击右下角添加</p>';
         return;
       }
       sourceList.innerHTML = '';
@@ -602,68 +602,66 @@
     function loadChapter(index) {
       if (index < 0 || index >= currentChapters.length) {
         showToast(index < 0 ? '已是第一章' : '已是最后一章');
-返回；
-}
+        return;
+      }
 
-currentChapterIndex=index；
-Const chapter=currentChapters[index]；
+      currentChapterIndex = index;
+      const chapter = currentChapters[index];
       
-Const readerContent=document.getElementById('readerContent')；
-readerContent.innerHTML='
-        <H3 风格="文本对齐: 中心; 底边距: 20PX;">${chapter.title}</H3>
-        <p>${chapter.content.replace(/\n/g，'</p><p>')}</p>
-`;
+      const readerContent = document.getElementById('readerContent');
+      readerContent.innerHTML = `
+        <h3 style="text-align: center; margin-bottom: 20px;">${chapter.title}</h3>
+        <p>${chapter.content.replace(/\n/g, '</p><p>')}</p>
+      `;
       
-// 联动更新目录高亮
-文件。querySelectorAll('.catalog-item').foreach((item，I)=>{
-item.classList.remove('current')；
-if(i===index)item.classList.add('current')；
+      // 联动更新目录高亮
+      document.querySelectorAll('.catalog-item').forEach((item, i) => {
+        item.classList.remove('current');
+        if (i === index) item.classList.add('current');
       });
 
-switchPage('pageReader')；
+      switchPage('pageReader');
     }
 
-函数prevChapter(){loadChapter(currentChapterIndex-1)；}
-函数nextchapter(){loadChapter(currentChapterIndex+1)；}
+    function prevChapter() { loadChapter(currentChapterIndex - 1); }
+    function nextChapter() { loadChapter(currentChapterIndex + 1); }
 
-//=====================工具函数(增强清除缓存)=====================
-函数initDarkMode(){/*保持不变*/
-if(isDarkMode){
-document.body.classList.add('深色模式')；
-文件。getElementById('darkModeToggle').classList。添加(“活动”)；
+    // ===================== 工具函数 (增强清除缓存) =====================
+    function initDarkMode() { /* 保持不变 */
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeToggle').classList.add('active');
       }
     }
 
-函数toggleDarkMode(){/*保持不变*/
-isDarkMode=！isDarkMode；
-文件。身体。classList.Toggle('dark-mode'，isDarkMode)；
-文件。getElementById('darkModeToggle').classList。切换('active'，isDarkMode)；
-localStorage.setItem('深色模式'，isDarkMode)；
-showToast(isDarkMode？'已开启夜间模式'：'已关闭夜间模式')；
+    function toggleDarkMode() { /* 保持不变 */
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      document.getElementById('darkModeToggle').classList.toggle('active', isDarkMode);
+      localStorage.setItem('darkMode', isDarkMode);
+      showToast(isDarkMode ? '已开启夜间模式' : '已关闭夜间模式');
     }
 
-函数clearCache(){/*增强：同时清除书架*/
-if(确认('警告：这将删除所有书源和书架数据，且无法恢复！ ')){
-localStorage.removeItem('sources')；
-localStorage.removeItem('shelfBooks')；//联动清除
-来源=[]；
-shelfBooks=[]；
-RenderSource()；
-renderShelf()；//联动刷新
-showToast('缓存已清除')；
+    function clearCache() { /* 增强：同时清除书架 */
+      if (confirm('警告：这将删除所有书源和书架数据，且无法恢复！')) {
+        localStorage.removeItem('sources');
+        localStorage.removeItem('shelfBooks'); // 联动清除
+        sources = [];
+        shelfBooks = [];
+        renderSources();
+        renderShelf(); // 联动刷新
+        showToast('缓存已清除');
       }
     }
 
-函数showToast(msg){/*保持不变*/
-Const toast=document.getElementById('toast')；
-toast.innerText=msg；
-toast.classList.add('show')；
-setTimeout(()=>{
-toast.classList.remove('show')；
-}, 2000);
+    function showToast(msg) { /* 保持不变 */
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
     }
-</脚本>
+  </script>
 </body>
 </html>
-
-
