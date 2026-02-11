@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>冰阅阁</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: #f8f9fa; color: #333; padding-bottom: 60px; }
+        
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; display: flex; align-items: center; padding: 0 16px; z-index: 999;
+        }
+        .header h1 { font-size: 18px; font-weight: 600; flex: 1; text-align: center; }
+        .header .back-btn { position: absolute; left: 16px; cursor: pointer; }
+        
+        .page { display: none; margin-top: 50px; padding: 16px; min-height: calc(100vh - 110px); }
+        .page.active { display: block; }
+        
+        .banner { height: 120px; background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; padding: 0 20px; color: #333; }
+        .section-title { font-size: 16px; font-weight: 600; margin: 12px 0; display: flex; justify-content: space-between; }
+        .section-title a { color: #667eea; font-size: 14px; text-decoration: none; }
+        .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .book-item { text-align: center; cursor: pointer; }
+        .book-cover { width: 100%; aspect-ratio: 3/4; background: #e9ecef; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+        .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .book-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .tabbar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+            background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; align-items: center; z-index: 999;
+        }
+        .tab-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 12px; text-decoration: none; }
+        .tab-item.active { color: #667eea; }
+        .tab-item .icon { font-size: 20px; margin-bottom: 4px; }
+
+        .user-info { background: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
+        .user-info .avatar { width: 60px; height: 60px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px; }
+        .menu-list { background: white; border-radius: 12px; overflow: hidden; }
+        .menu-item { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333; }
+        .team-member { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .team-member .avatar { width: 48px; height: 48px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px; }
+        .member-info { flex: 1; }
+        .member-name { font-size: 15px; font-weight: 500; }
+        .member-role { font-size: 12px; color: #999; }
+        .contact-info { margin-top: 20px; padding: 16px; background: white; border-radius: 12px; }
+        .contact-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+        .contact-label { color: #666; }
+
+        .reader-content { padding: 20px; line-height: 1.8; font-size: 16px; }
+        .reader-toolbar { display: flex; justify-content: space-around; padding: 10px; background: #f0f0f0; border-radius: 8px; margin-top: 20px; }
+        .reader-toolbar button { padding: 8px 16px; border: none; border-radius: 4px; background: #667eea; color: white; }
+
+        .source-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f0f0f0; background: white; margin-bottom: 8px; border-radius: 8px; }
+        .add-btn { position: fixed; bottom: 80px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="back-btn" onclick="goBack()">←</span>
+        <h1 id="pageTitle">冰阅阁</h1>
+    </div>
+
+    <div class="page active" id="shelfPage">
+        <div class="banner">
+            <div>
+                <h2>欢迎回来</h2>
+                <p>继续阅读你喜欢的小说</p>
+            </div>
+        </div>
+        <div class="section-title">
+            <span>我的书架</span>
+            <a href="#" onclick="goToPage('sourcePage')">书源管理</a>
+        </div>
+        <div class="book-grid">
+            <div class="book-item" onclick="goToPage('readerPage')">
+                <div class="book-cover"><img src="https://picsum.photos/200/260?random=1" alt="封面"></div>
+                <div class="book-title">斗破苍穹</div>
+            </div>
+            <div class="book-item" onclick="goToPage('readerPage')">
+                <div class="book-cover"><img src="https://picsum.photos/200/260?random=2" alt="封面"></div>
+                <div class="book-title">全职高手</div>
+            </div>
+            <div class="book-item" onclick="goToPage('readerPage')">
+                <div class="book-cover"><img src="https://picsum.photos/200/260?random=3" alt="封面"></div>
+                <div class="book-title">诡秘之主</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="discoverPage">
+        <div class="section-title"><span>热门推荐</span><a href="#">更多</a></div>
+        <div class="book-grid">
+            <div class="book-item" onclick="goToPage('readerPage')">
+                <div class="book-cover"><img src="https://picsum.photos/200/260?random=4" alt="封面"></div>
+                <div class="book-title">全球高武</div>
+            </div>
+            <div class="book-item" onclick="goToPage('readerPage')">
+                <div class="book-cover"><img src="https://picsum.photos/200/260?random=5" alt="封面"></div>
+                <div class="book-title">我师兄实在太稳健了</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="profilePage">
+        <div class="user-info">
+            <div class="avatar">👤</div>
+            <div class="user-name">冰阅阁用户</div>
+        </div>
+        <div class="menu-list">
+            <div class="menu-item" onclick="goToPage('sourcePage')">
+                <span>书源管理</span><span>→</span>
+            </div>
+            <div class="menu-item" onclick="alert('设置功能开发中')">
+                <span>阅读设置</span><span>→</span>
+            </div>
+            <div class="menu-item" onclick="showTeamInfo()">
+                <span>关于团队</span><span>→</span>
+            </div>
+        </div>
+
+        <div id="teamInfo" style="display:none; margin-top:20px;">
+            <div class="section-title"><span>开发团队</span></div>
+            <div class="team-member"><div class="avatar">冰</div><div class="member-info"><div class="member-name">冰郁泪</div><div class="member-role">核心开发</div></div></div>
+            <div class="team-member"><div class="avatar">晴</div><div class="member-info"><div class="member-name">晴宝</div><div class="member-role">UI设计</div></div></div>
+            <div class="team-member"><div class="avatar">叶</div><div class="member-info"><div class="member-name">叶青云</div><div class="member-role">产品经理</div></div></div>
+            <div class="team-member"><div class="avatar">枫</div><div class="member-info"><div class="member-name">枫叶</div><div class="member-role">后端开发</div></div></div>
+            
+            <div class="contact-info">
+                <div class="section-title"><span>联系我们</span></div>
+                <div class="contact-item"><span class="contact-label">私人联系</span><span>2326895769@qq.com</span></div>
+                <div class="contact-item"><span class="contact-label">私人工作</span><span>2414582386@qq.com</span></div>
+                <div class="contact-item"><span class="contact-label">团队开发</span><span>catgopii@gmail.com</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="readerPage">
+        <div class="reader-content">
+            <h3 style="text-align:center; margin-bottom:20px;">第一章 陨落的天才</h3>
+            <p>斗之气，三段！</p>
+            <p>望着测验魔石碑上面那清晰无比的四个大字，少年面无表情，唇角却有着一抹自嘲。</p>
+            <p>这已是他连续第三年参加成人测验，然而结果，却是一如既往的凄惨。</p>
+            <p>魔石碑旁，一位中年男子面无表情的看了眼石碑上的数字，又看了眼面前的少年，挥了挥手，不耐烦的道：“下一个，萧媚。”</p>
+            <p>少年默默的走下台，周围传来的一道道幸灾乐祸的议论声，如同针一般扎在他的心头。</p>
+            <p>“唉，又是三段，这废物还真是屡教不改啊。”</p>
+            <p>“谁让他三年前突然把斗气弄没了呢？现在能保持三段都算他努力了。”</p>
+        </div>
+        <div class="reader-toolbar">
+            <button onclick="adjustFont(-1)">A-</button>
+            <button onclick="toggleNight()">夜间</button>
+            <button onclick="adjustFont(1)">A+</button>
+        </div>
+    </div>
+
+    <div class="page" id="sourcePage">
+        <div class="section-title"><span>书源管理</span></div>
+        <div class="source-item">
+            <div>
+                <div>笔趣阁</div>
+                <div style="font-size:12px;color:#999;">https://example.com</div>
+            </div>
+            <input type="checkbox" checked>
+        </div>
+        <div class="source-item">
+            <div>
+                <div>起点中文</div>
+                <div style="font-size:12px;color:#999;">https://example.com</div>
+            </div>
+            <input type="checkbox">
+        </div>
+        <div class="add-btn" onclick="alert('添加书源功能开发中')">+</div>
+    </div>
+
+    <div class="tabbar">
+        <div class="tab-item active" onclick="switchTab('shelfPage', '冰阅阁')"><div class="icon">📚</div><span>书架</span></div>
+        <div class="tab-item" onclick="switchTab('discoverPage', '发现')"><div class="icon">🔍</div><span>发现</span></div>
+        <div class="tab-item" onclick="switchTab('profilePage', '我的')"><div class="icon">👤</div><span>我的</span></div>
+    </div>
+
+    <script>
+        let currentPage = 'shelfPage';
+        let fontSize = 16;
+        let isNight = false;
+
+        function switchTab(pageId, title) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            document.getElementById('pageTitle').innerText = title;
+            currentPage = pageId;
+            document.querySelector('.back-btn').style.display = (['shelfPage','discoverPage','profilePage'].includes(pageId)) ? 'none' : 'block';
+        }
+
+        function goToPage(pageId, title) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById('pageTitle').innerText = title || (pageId === 'readerPage' ? '斗破苍穹' : '书源管理');
+            currentPage = pageId;
+            document.querySelector('.back-btn').style.display = 'block';
+        }
+
+        function goBack() {
+            if (currentPage === 'readerPage' || currentPage === 'sourcePage') {
+                switchTab('shelfPage', '冰阅阁');
+            } else {
+                document.getElementById('teamInfo').style.display = 'none';
+            }
+        }
+
+        function showTeamInfo() {
+            document.getElementById('teamInfo').style.display = 'block';
+        }
+
+        function adjustFont(delta) {
+            fontSize = Math.max(14, Math.min(24, fontSize + delta));
+            document.querySelector('.reader-content').style.fontSize = fontSize + 'px';
+        }
+
+        function toggleNight() {
+            isNight = !isNight;
+            const body = document.body;
+            if (isNight) {
+                body.style.background = '#1a1a1a';
+                body.style.color = '#ccc';
+            } else {
+                body.style.background = '#f8f9fa';
+                body.style.color = '#333';
+            }
+        }
+    </script>
+</body>
+</html>
