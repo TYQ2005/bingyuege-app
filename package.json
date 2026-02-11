@@ -1,0 +1,15 @@
+{
+  "name": "bingyuege-app",
+  "version": "1.0.0",
+  "description": "冰阅阁 - 多功能阅读APP",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["reading", "book", "android"],
+  "author": "冰郁泪, 晴宝, 叶青云, 枫叶",
+  "license": "MIT",
+  "dependencies": {
+    "cordova-android": "^12.0.0"
+  }
+}
