@@ -29,9 +29,15 @@ jobs:
     - name: Build release APK
       run: cordova build android --release
 
+    - name: List build outputs
+      run: find platforms/android/app/build/outputs/apk -name "*.apk"
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: bingyuege-apk
+        path: platforms/android/app/build/outputs/apk/**/*.apk
+        if-no-files-found: error
+
         path: platforms/android/app/build/outputs/apk/release/*.apk
         if-no-files-found: error
