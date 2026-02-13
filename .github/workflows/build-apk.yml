@@ -1,40 +1,92 @@
-name: Build Android APK
+name: 构建 APK 应用
 
 on:
   push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
     branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code
+    - name: 检出代码
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
+    - name: 设置 Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
 
-    - name: Install Cordova
+    - name: 设置 Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    - name: 设置 Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: 缓存 npm
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+    - name: 安装 Cordova
       run: npm install -g cordova
 
-    - name: Install dependencies
+    - name: 安装依赖
       run: npm install
 
-    - name: Add Android platform
+    - name: 添加 Android 平台
       run: cordova platform add android@latest
 
-    - name: Build debug APK
+    - name: 构建 APK (Debug)
       run: cordova build android --debug
 
-    - name: List build outputs
-      run: find platforms/android -name "*.apk"
+    - name: 构建 APK (Release)
+      if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: cordova build android --release
 
-    - name: Upload APK
+    - name: 查找构建输出
+      run: find platforms/android -name "*.apk" -type f
+
+    - name: 上传 APK 到 Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: bingyuege-apk
         path: platforms/android/**/*.apk
         if-no-files-found: error
+
+    - name: 创建 Release (仅在标签推送时)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          platforms/android/app/build/outputs/apk/release/app-release.apk
+          platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        body: |
+          # 冰阅 APP 发布版本
+          
+          版本: ${{ github.ref_name }}
+          
+          ## 功能特性
+          - ✨ 支持 JSON/XML/文本/URL 四种格式书源导入
+          - 📚 完整的书籍管理和阅读功能
+          - 🌓 夜间/白天主题切换
+          - 💾 阅读进度自动保存
+          - 📖 章节导航和目录快速定位
+          
+          ## 安装说明
+          1. 下载 APK 文件
+          2. 在 Android 设备上安装
+          3. 允许必要的权限
+          4. 开始使用
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
