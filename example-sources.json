@@ -1,0 +1,14 @@
+[
+  {
+    "name": "笔趣阁",
+    "url": "https://api.example.com/books.json"
+  },
+  {
+    "name": "起点中文网",
+    "url": "https://api.example.com/qidian.json"
+  },
+  {
+    "name": "网易文学",
+    "url": "https://api.example.com/netease.json"
+  }
+]

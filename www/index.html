@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
   <title>冰阅</title>
   <style>
     :root {
@@ -29,7 +30,6 @@
       transition: background 0.3s, color 0.3s;
     }
     
-    /* 核心布局 (保持不变) */
     .top-bar {
       position: fixed; top: 0; left: 0; width: 100%;
       height: 50px; background: var(--primary); color: #fff;
@@ -57,7 +57,6 @@
     .nav-item.active { color: var(--primary); }
     .nav-item i { font-size: 20px; margin-bottom: 3px; }
 
-    /* 通用组件 (保持不变) */
     .card { 
       background: var(--card-light); 
       border-radius: 8px; 
@@ -93,6 +92,8 @@
       width: 90%; max-width: 400px;
       border: 1px solid var(--border);
       transition: background 0.3s, border-color 0.3s;
+      max-height: 85vh;
+      overflow-y: auto;
     }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-primary); }
@@ -120,7 +121,6 @@
     }
     .toast.show { display: block; }
 
-    /* 加载中 (新增，复用原有逻辑) */
     .loading {
       text-align: center; padding: 40px 0; color: var(--text-secondary);
     }
@@ -131,7 +131,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 书籍与书架样式 (新增，保持风格统一) */
     .book-item {
       display: flex; gap: 10px; padding: 10px 0;
       border-bottom: 1px solid var(--border);
@@ -139,14 +138,13 @@
     }
     .book-cover {
       width: 60px; height: 80px; background: #eee; border-radius: 4px;
-      overflow: hidden;
+      overflow: hidden; flex-shrink: 0;
     }
     .book-cover img { width: 100%; height: 100%; object-fit: cover; }
     .book-info { flex: 1; }
     .book-title { font-weight: bold; margin-bottom: 4px; }
     .book-author, .book-progress { font-size: 12px; color: var(--text-secondary); }
 
-    /* 阅读器 (新增，保持交互习惯) */
     .reader-page { padding: 20px; line-height: 1.8; font-size: 16px; }
     .reader-content { margin-bottom: 60px; }
     .reader-toolbar {
@@ -158,7 +156,6 @@
       display: flex; flex-direction: column; align-items: center; font-size: 12px; cursor: pointer;
     }
 
-    /* 目录页 (新增) */
     .catalog-page { padding: 0; }
     .catalog-header {
       padding: 15px; background: var(--primary); color: #fff;
@@ -172,7 +169,6 @@
     }
     .catalog-item.current { color: var(--primary); font-weight: bold; }
 
-    /* 更多功能样式 (保持不变) */
     .setting-item {
       display: flex; justify-content: space-between;
       align-items: center;
@@ -198,22 +194,43 @@
       background: #fff; top: 2px; left: 2px; transition: left 0.3s;
     }
     .toggle.active::after { left: 24px; }
+
+    .import-type-section textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 12px;
+      background: var(--card-light);
+      color: var(--text-primary);
+    }
+
+    .import-status {
+      margin-top: 10px;
+      font-size: 12px;
+      padding: 10px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
-  <!-- 顶部导航 (保持不变) -->
   <div class="top-bar">冰阅 · 书源管理</div>
 
-  <!-- 1. 书源管理页 (保持原有结构) -->
+  <!-- 1. 书源管理页 -->
   <div id="pageSource" class="page active">
     <div class="card">
       <h3 style="margin-bottom: 10px; font-size: 16px;">书源列表</h3>
+      <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+        <button class="btn" onclick="openImportModal()" style="flex: 1; font-size: 13px;">📥 导入</button>
+        <button class="btn btn-secondary" onclick="openModal()" style="flex: 1; font-size: 13px;">➕ 新增</button>
+      </div>
       <div id="sourceList"></div>
     </div>
     <button class="add-btn" onclick="openModal()">+</button>
   </div>
 
-  <!-- 2. 书架页 (功能升级：联动阅读进度) -->
+  <!-- 2. 书架页 -->
   <div id="pageShelf" class="page">
     <div class="card">
       <h3 style="font-size: 16px; margin-bottom: 15px;">我的书架</h3>
@@ -223,7 +240,7 @@
     </div>
   </div>
 
-  <!-- 3. 书籍列表页 (保持原有入口) -->
+  <!-- 3. 书籍列表页 -->
   <div id="pageBooks" class="page">
     <div class="card">
       <h3 style="font-size: 16px; margin-bottom: 15px;">
@@ -234,7 +251,7 @@
     </div>
   </div>
 
-  <!-- 4. 阅读器页 (新增：加入书架逻辑) -->
+  <!-- 4. 阅读器页 -->
   <div id="pageReader" class="page reader-page">
     <div id="readerContent" class="reader-content"></div>
     <div class="reader-toolbar">
@@ -244,7 +261,7 @@
       </div>
       <div class="reader-tool" onclick="addToShelf()">
         <i>📚</i>
-        <span>加入书架</span>
+        <span>加书架</span>
       </div>
       <div class="reader-tool" onclick="switchPage('pageCatalog')">
         <i>☰</i>
@@ -257,7 +274,7 @@
     </div>
   </div>
 
-  <!-- 5. 目录页 (新增) -->
+  <!-- 5. 目录页 -->
   <div id="pageCatalog" class="page catalog-page">
     <div class="catalog-header">
       <span id="catalogBookTitle">目录</span>
@@ -268,7 +285,7 @@
     </div>
   </div>
 
-  <!-- 6. 更多页 (保持不变) -->
+  <!-- 6. 更多页 -->
   <div id="pageMore" class="page">
     <div class="card">
       <h3 style="font-size: 16px; margin-bottom: 15px;">系统设置</h3>
@@ -278,12 +295,12 @@
       </div>
       <div class="setting-item" onclick="clearCache()">
         <span>清除缓存</span>
-        <span class="setting-desc">删除所有书源和书架数据</span>
+        <span class="setting-desc">删除所有数据</span>
       </div>
     </div>
   </div>
 
-  <!-- 添加/编辑书源弹窗 (保持原有结构) -->
+  <!-- 添加/编辑书源弹窗 -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <h3 id="modalTitle" style="margin-bottom: 15px; font-size: 18px;">添加书源</h3>
@@ -294,7 +311,7 @@
       </div>
       <div class="form-group">
         <label>书源地址</label>
-        <input type="text" id="sourceUrl" class="form-control" placeholder="https://xxx.com">
+        <input type="text" id="sourceUrl" class="form-control" placeholder="https://xxx.com/api/books.json">
       </div>
       <div style="display: flex; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal()">取消</button>
@@ -303,10 +320,68 @@
     </div>
   </div>
 
-  <!-- 提示框 (保持不变) -->
+  <!-- 导入书源弹窗 -->
+  <div id="importModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 15px; font-size: 18px;">导入书源</h3>
+      <div class="form-group">
+        <label>选择导入方式</label>
+        <select id="importType" class="form-control" onchange="updateImportUI()">
+          <option value="json">JSON格式</option>
+          <option value="xml">XML格式</option>
+          <option value="text">文本列表</option>
+          <option value="url">从URL导入</option>
+        </select>
+      </div>
+      
+      <div id="importJson" class="import-type-section">
+        <div class="form-group">
+          <label>粘贴JSON数据</label>
+          <textarea id="jsonInput" class="form-control" placeholder='[{"name":"笔趣阁","url":"https://..."},...]' style="height: 100px;"></textarea>
+        </div>
+      </div>
+      
+      <div id="importXml" class="import-type-section" style="display:none;">
+        <div class="form-group">
+          <label>粘贴XML数据</label>
+          <textarea id="xmlInput" class="form-control" placeholder='&lt;sources&gt;&lt;source&gt;&lt;name&gt;书源&lt;/name&gt;&lt;url&gt;...&lt;/url&gt;&lt;/source&gt;&lt;/sources&gt;' style="height: 100px;"></textarea>
+        </div>
+      </div>
+      
+      <div id="importText" class="import-type-section" style="display:none;">
+        <div class="form-group">
+          <label>文本列表 (每行一个: 名称|URL)</label>
+          <textarea id="textInput" class="form-control" placeholder='笔趣阁|https://www.biquge.io' style="height: 100px;"></textarea>
+        </div>
+      </div>
+      
+      <div id="importUrl" class="import-type-section" style="display:none;">
+        <div class="form-group">
+          <label>数据源URL</label>
+          <input type="text" id="sourceDataUrl" class="form-control" placeholder="https://example.com/sources.json">
+        </div>
+        <div class="form-group">
+          <label>数据格式</label>
+          <select id="urlFormat" class="form-control">
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+            <option value="text">文本列表</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeImportModal()">取消</button>
+        <button class="btn" onclick="executeImport()">导入</button>
+      </div>
+      <div id="importStatus" class="import-status" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- 提示框 -->
   <div id="toast" class="toast"></div>
 
-  <!-- 底部导航 (保持不变) -->
+  <!-- 底部导航 -->
   <div class="bottom-nav">
     <div class="nav-item" onclick="switchPage('pageShelf')">
       <i>📚</i>
@@ -323,7 +398,7 @@
   </div>
 
   <script>
-    // ===================== 原有全局变量 (保持不变) =====================
+    // ===================== 全局变量 =====================
     let sources = JSON.parse(localStorage.getItem('sources') || '[]');
     let currentEditId = null;
     let isDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -331,18 +406,17 @@
     let currentBook = null;
     let currentChapters = [];
     let currentChapterIndex = 0;
+    let shelfBooks = JSON.parse(localStorage.getItem('shelfBooks') || '[]');
+    let booksCache = {};
 
-    // ===================== 新增全局变量 (联动核心) =====================
-    let shelfBooks = JSON.parse(localStorage.getItem('shelfBooks') || '[]'); // 书架数据
-
-    // ===================== 初始化 (保持原有逻辑 + 新增渲染) =====================
+    // ===================== 初始化 =====================
     window.onload = function() {
-      renderSources();    // 原有逻辑
-      renderShelf();      // 新增逻辑
-      initDarkMode();     // 原有逻辑
+      renderSources();
+      renderShelf();
+      initDarkMode();
     };
 
-    // ===================== 页面切换 (保持原有逻辑，兼容新页面) =====================
+    // ===================== 页面切换 =====================
     function switchPage(pageId) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
@@ -354,7 +428,6 @@
         }
       });
       
-      // 标题联动 (新增页面支持)
       const titles = {
         'pageSource': '冰阅 · 书源管理',
         'pageShelf': '冰阅 · 我的书架',
@@ -366,33 +439,33 @@
       document.querySelector('.top-bar').innerText = titles[pageId];
     }
 
-    // ===================== 原有书源管理逻辑 (完全保持不变) =====================
+    // ===================== 书源管理 =====================
     function renderSources() {
       const sourceList = document.getElementById('sourceList');
       if (sources.length === 0) {
-        sourceList.innerHTML = '<p style="color: var(--text-secondary);">暂无书源，点击右下角添加</p>';
+        sourceList.innerHTML = '<p style="color: var(--text-secondary);">暂无书源，点击导入或新增</p>';
         return;
       }
       sourceList.innerHTML = '';
       sources.forEach(source => {
         const item = document.createElement('div');
         item.className = 'source-item';
-        item.onclick = () => loadBooksFromSource(source); // 点击逻辑不变
+        item.onclick = () => loadBooksFromSource(source);
         item.innerHTML = `
           <div>
             <strong>${source.name}</strong>
             <p style="font-size: 12px; color: var(--text-secondary);">${source.url}</p>
           </div>
           <div style="display: flex; gap: 5px;">
-            <button class="btn btn-secondary" onclick="event.stopPropagation(); editSource('${source.id}')">编辑</button>
-            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteSource('${source.id}')">删除</button>
+            <button class="btn btn-secondary" onclick="event.stopPropagation(); editSource('${source.id}')" style="padding: 5px 10px; font-size: 12px;">编辑</button>
+            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteSource('${source.id}')" style="padding: 5px 10px; font-size: 12px;">删除</button>
           </div>
         `;
         sourceList.appendChild(item);
       });
     }
 
-    function openModal() { /* 保持不变 */
+    function openModal() {
       currentEditId = null;
       document.getElementById('modalTitle').innerText = '添加书源';
       document.getElementById('sourceId').value = '';
@@ -401,11 +474,11 @@
       document.getElementById('modal').classList.add('show');
     }
 
-    function closeModal() { /* 保持不变 */
+    function closeModal() {
       document.getElementById('modal').classList.remove('show');
     }
 
-    function saveSource() { /* 保持不变 */
+    function saveSource() {
       const id = document.getElementById('sourceId').value || Date.now().toString();
       const name = document.getElementById('sourceName').value.trim();
       const url = document.getElementById('sourceUrl').value.trim();
@@ -427,7 +500,7 @@
       showToast('保存成功');
     }
 
-    function editSource(id) { /* 保持不变 */
+    function editSource(id) {
       const source = sources.find(s => s.id === id);
       if (!source) return;
       currentEditId = id;
@@ -438,7 +511,7 @@
       document.getElementById('modal').classList.add('show');
     }
 
-    function deleteSource(id) { /* 保持不变 */
+    function deleteSource(id) {
       if (confirm('确定删除该书源吗？')) {
         sources = sources.filter(s => s.id !== id);
         localStorage.setItem('sources', JSON.stringify(sources));
@@ -447,143 +520,312 @@
       }
     }
 
-    // ===================== 原有书籍加载逻辑 (优化：支持真实点击) =====================
-    function loadBooksFromSource(source) {
-      currentSource = source;
-      document.getElementById('sourceBookTitle').innerText = `${source.name} - 书籍列表`;
-      
-      // 模拟数据结构保持不变，便于后续扩展
-      const mockBooks = [
-        { 
-          id: 'b1', 
-          title: '斗破苍穹', 
-          author: '天蚕土豆', 
-          cover: 'https://via.placeholder.com/60x80?text=斗破',
-          chapters: [
-            { id: 'c1', title: '第一章 陨落的天才', content: '少年望着测验魔石碑，上面清晰的镌刻着三个字：萧炎。\n\n等级：三段。\n\n望着这令人失望的成绩，少年自嘲的笑了笑。' },
-            { id: 'c2', title: '第二章 废柴与天才', content: '“唉，这孩子，真是可惜了。”\n\n“是啊，曾经是何等的天才，如今却是这般模样...”' }
-          ]
-        },
-        { 
-          id: 'b2', 
-          title: '斗罗大陆', 
-          author: '唐家三少', 
-          cover: 'https://via.placeholder.com/60x80?text=斗罗',
-          chapters: [
-            { id: 'c1', title: '第一章 穿越的唐家三少', content: '唐门外门弟子唐三，因偷学内门绝学为唐门所不容，跳崖明志时却发现没有死，反而穿越到了另一个世界。' }
-          ]
-        }
-      ];
+    // ===================== 导入功能 =====================
+    function openImportModal() {
+      document.getElementById('importType').value = 'json';
+      updateImportUI();
+      document.getElementById('jsonInput').value = '';
+      document.getElementById('xmlInput').value = '';
+      document.getElementById('textInput').value = '';
+      document.getElementById('sourceDataUrl').value = '';
+      document.getElementById('importStatus').style.display = 'none';
+      document.getElementById('importModal').classList.add('show');
+    }
 
+    function closeImportModal() {
+      document.getElementById('importModal').classList.remove('show');
+    }
+
+    function updateImportUI() {
+      const type = document.getElementById('importType').value;
+      document.getElementById('importJson').style.display = type === 'json' ? 'block' : 'none';
+      document.getElementById('importXml').style.display = type === 'xml' ? 'block' : 'none';
+      document.getElementById('importText').style.display = type === 'text' ? 'block' : 'none';
+      document.getElementById('importUrl').style.display = type === 'url' ? 'block' : 'none';
+    }
+
+    async function executeImport() {
+      const type = document.getElementById('importType').value;
+      const statusEl = document.getElementById('importStatus');
+      statusEl.style.display = 'block';
+      statusEl.innerText = '处理中...';
+
+      try {
+        let importedSources = [];
+
+        if (type === 'json') {
+          const data = JSON.parse(document.getElementById('jsonInput').value);
+          importedSources = Array.isArray(data) ? data : (data.sources || data.list || []);
+        } else if (type === 'xml') {
+          const xml = document.getElementById('xmlInput').value;
+          importedSources = parseImportXML(xml);
+        } else if (type === 'text') {
+          const text = document.getElementById('textInput').value;
+          importedSources = parseImportText(text);
+        } else if (type === 'url') {
+          const url = document.getElementById('sourceDataUrl').value;
+          const format = document.getElementById('urlFormat').value;
+          importedSources = await loadFromURL(url, format);
+        }
+
+        // 添加导入的书源
+        importedSources.forEach(src => {
+          if (src.name && src.url) {
+            sources.push({
+              id: Date.now().toString() + Math.random(),
+              name: src.name || src.title || '未知',
+              url: src.url || src.link || ''
+            });
+          }
+        });
+
+        localStorage.setItem('sources', JSON.stringify(sources));
+        renderSources();
+        closeImportModal();
+        showToast(`成功导入 ${importedSources.length} 个书源`);
+      } catch (error) {
+        statusEl.innerText = '❌ ' + error.message;
+      }
+    }
+
+    function parseImportXML(xmlText) {
+      const sources = [];
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+      
+      if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+        throw new Error('XML格式错误');
+      }
+
+      const sourceElems = xmlDoc.getElementsByTagName('source') || xmlDoc.getElementsByTagName('item');
+      for (let elem of sourceElems) {
+        sources.push({
+          name: elem.getElementsByTagName('name')[0]?.textContent || elem.getElementsByTagName('title')[0]?.textContent || '未知',
+          url: elem.getElementsByTagName('url')[0]?.textContent || elem.getElementsByTagName('address')[0]?.textContent || ''
+        });
+      }
+      return sources;
+    }
+
+    function parseImportText(text) {
+      const sources = [];
+      const lines = text.trim().split('\n');
+      lines.forEach(line => {
+        const parts = line.split('|').length > 1 ? line.split('|') : line.split('\t');
+        if (parts.length >= 2) {
+          sources.push({
+            name: parts[0].trim(),
+            url: parts[1].trim()
+          });
+        }
+      });
+      return sources;
+    }
+
+    async function loadFromURL(url, format) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const text = await response.text();
+      if (format === 'json') {
+        const data = JSON.parse(text);
+        return Array.isArray(data) ? data : (data.sources || data.list || []);
+      } else if (format === 'xml') {
+        return parseImportXML(text);
+      } else {
+        return parseImportText(text);
+      }
+    }
+
+    // ===================== 书籍加载 =====================
+    async function loadBooksFromSource(source) {
+      currentSource = source;
+      document.getElementById('sourceBookTitle').innerText = `${source.name} - 加载中...`;
+      
       const bookList = document.getElementById('bookList');
+      bookList.innerHTML = '<div class="loading">加载书籍中...</div>';
+      switchPage('pageBooks');
+      
+      try {
+        if (booksCache[source.id]) {
+          displayBooks(booksCache[source.id]);
+          return;
+        }
+        
+        const response = await fetch(source.url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json, application/xml, text/plain',
+            'User-Agent': 'Mozilla/5.0 (Android)'
+          }
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const contentType = response.headers.get('content-type') || '';
+        let data;
+        
+        if (contentType.includes('json')) {
+          data = await response.json();
+        } else if (contentType.includes('xml')) {
+          const text = await response.text();
+          data = parseXML(text);
+        } else {
+          const text = await response.text();
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            try {
+              data = parseXML(text);
+            } catch (e2) {
+              data = parseTextBooks(text);
+            }
+          }
+        }
+        
+        booksCache[source.id] = data;
+        displayBooks(data);
+      } catch (error) {
+        console.error('加载失败:', error);
+        showErrorBooks(error);
+      }
+    }
+
+    function displayBooks(books) {
+      const bookList = document.getElementById('bookList');
+      
+      if (!Array.isArray(books)) {
+        books = books.books || books.source || books.list || [];
+      }
+      
+      if (books.length === 0) {
+        bookList.innerHTML = '<p style="color: var(--text-secondary);">未找到书籍</p>';
+        return;
+      }
+      
+      document.getElementById('sourceBookTitle').innerText = `${currentSource.name} - ${books.length}本书`;
       bookList.innerHTML = '';
-      mockBooks.forEach(book => {
+      
+      books.forEach(book => {
         const item = document.createElement('div');
         item.className = 'book-item';
-        // 修复：使用闭包确保点击时获取正确的book对象
-        item.onclick = (function(b) {
-          return function() {
-            openBook(b);
-          };
-        })(book);
+        item.onclick = () => openBook(book);
+        
+        const title = book.title || book.name || '未知书名';
+        const author = book.author || book.writer || '未知作者';
+        const cover = book.cover || book.image || book.img || 'https://via.placeholder.com/60x80?text=no+cover';
+        
         item.innerHTML = `
           <div class="book-cover">
-            <img src="${book.cover}" alt="${book.title}">
+            <img src="${cover}" alt="${title}" onerror="this.src='https://via.placeholder.com/60x80?text=book'">
           </div>
           <div class="book-info">
-            <div class="book-title">${book.title}</div>
-            <div class="book-author">作者：${book.author}</div>
+            <div class="book-title">${title}</div>
+            <div class="book-author">作者：${author}</div>
+            <div class="book-progress">点击阅读</div>
           </div>
         `;
         bookList.appendChild(item);
       });
-
-      switchPage('pageBooks');
     }
 
-    // ===================== 新增：书架联动核心功能 =====================
-    
-    /**
-     * 渲染书架
-     */
-    function renderShelf() {
-      const shelfList = document.getElementById('shelfList');
-      if (shelfBooks.length === 0) {
-        shelfList.innerHTML = '<p style="color: var(--text-secondary);">暂无书籍，去书源中添加吧</p>';
+    function showErrorBooks(error) {
+      const bookList = document.getElementById('bookList');
+      bookList.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #dc3545;">
+          <p style="margin-bottom: 10px;">📥 加载失败</p>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">${error.message}</p>
+          <button class="btn btn-secondary" onclick="switchPage('pageSource')">返回</button>
+        </div>
+      `;
+      document.getElementById('sourceBookTitle').innerText = `${currentSource.name} - 加载失败`;
+    }
+
+    // ===================== XML解析 =====================
+    function parseXML(xmlText) {
+      try {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+        
+        if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+          throw new Error('XML格式错误');
+        }
+        
+        const books = [];
+        const bookElements = xmlDoc.getElementsByTagName('book') || xmlDoc.getElementsByTagName('item');
+        
+        for (let elem of bookElements) {
+          const book = {
+            id: elem.getAttribute('id') || `book_${Date.now()}`,
+            title: elem.getElementsByTagName('title')[0]?.textContent || elem.getElementsByTagName('name')[0]?.textContent || '未知',
+            author: elem.getElementsByTagName('author')[0]?.textContent || '未知',
+            cover: elem.getElementsByTagName('cover')[0]?.textContent || '',
+            chapters: parseXMLChapters(elem)
+          };
+          if (book.title) books.push(book);
+        }
+        
+        return books;
+      } catch (error) {
+        throw new Error('XML解析失败');
+      }
+    }
+
+    function parseXMLChapters(bookElem) {
+      const chapters = [];
+      const chapterElements = bookElem.getElementsByTagName('chapter');
+      
+      for (let elem of chapterElements) {
+        chapters.push({
+          id: elem.getAttribute('id') || `ch_${Date.now()}`,
+          title: elem.getElementsByTagName('title')[0]?.textContent || '未名章',
+          content: elem.getElementsByTagName('content')[0]?.textContent || '暂无内容'
+        });
+      }
+      
+      return chapters;
+    }
+
+    function parseTextBooks(text) {
+      const books = [];
+      const lines = text.trim().split('\n').filter(l => l.trim());
+      
+      lines.forEach((line, index) => {
+        const parts = line.split('|').length > 1 ? line.split('|') : line.split('\t');
+        if (parts.length >= 2) {
+          books.push({
+            id: `book_${index}`,
+            title: parts[0].trim(),
+            author: parts[2] ? parts[2].trim() : '未知作者',
+            chapters: genChapters(parts[0].trim())
+          });
+        }
+      });
+      
+      return books;
+    }
+
+    function genChapters(bookTitle) {
+      return [
+        { id: 'c1', title: '第一章 开始', content: `欢迎阅读《${bookTitle}》\n\n这是示例章节。` }
+      ];
+    }
+
+    // ===================== 书籍阅读 =====================
+    async function openBook(book) {
+      currentBook = book;
+      
+      if (book.chapters && book.chapters.length > 0) {
+        currentChapters = book.chapters;
+        currentChapterIndex = 0;
+        renderCatalog();
+        loadChapter(0);
         return;
       }
-
-      shelfList.innerHTML = '';
-      shelfBooks.forEach(book => {
-        const item = document.createElement('div');
-        item.className = 'book-item';
-        item.onclick = () => openBookFromShelf(book);
-        item.innerHTML = `
-          <div class="book-cover">
-            <img src="${book.cover}" alt="${book.title}">
-          </div>
-          <div class="book-info">
-            <div class="book-title">${book.title}</div>
-            <div class="book-author">作者：${book.author}</div>
-            <div class="book-progress">正在阅读：${book.lastChapterTitle}</div>
-          </div>
-        `;
-        shelfList.appendChild(item);
-      });
-    }
-
-    /**
-     * 加入书架 (与阅读器联动)
-     */
-    function addToShelf() {
-      if (!currentBook) return;
-
-      // 检查是否已在书架
-      const existIndex = shelfBooks.findIndex(b => b.id === currentBook.id);
       
-      // 构建带进度的书架数据
-      const shelfBook = {
-        ...currentBook,
-        lastChapterIndex: currentChapterIndex,
-        lastChapterTitle: currentChapters[currentChapterIndex].title
-      };
-
-      if (existIndex > -1) {
-        // 更新进度
-        shelfBooks[existIndex] = shelfBook;
-        showToast('阅读进度已更新');
-      } else {
-        // 新增书籍
-        shelfBooks.push(shelfBook);
-        showToast('已加入书架');
-      }
-
-      // 持久化并刷新
-      localStorage.setItem('shelfBooks', JSON.stringify(shelfBooks));
-      renderShelf();
-    }
-
-    /**
-     * 从书架打开书籍 (恢复进度)
-     */
-    function openBookFromShelf(book) {
-      currentBook = book;
-      currentChapters = book.chapters;
-      // 关键联动：恢复上次阅读的章节
-      currentChapterIndex = book.lastChapterIndex || 0;
-      
-      // 直接加载目录和章节
-      renderCatalog();
-      loadChapter(currentChapterIndex);
-    }
-
-    // ===================== 阅读与目录逻辑 (优化联动) =====================
-    function openBook(book) {
-      currentBook = book;
-      currentChapters = book.chapters;
+      currentChapters = genChapters(book.title);
       currentChapterIndex = 0;
-      
-      renderCatalog(); // 打开书籍时同时准备目录
+      renderCatalog();
       loadChapter(0);
     }
 
@@ -614,7 +856,6 @@
         <p>${chapter.content.replace(/\n/g, '</p><p>')}</p>
       `;
       
-      // 联动更新目录高亮
       document.querySelectorAll('.catalog-item').forEach((item, i) => {
         item.classList.remove('current');
         if (i === index) item.classList.add('current');
@@ -626,15 +867,74 @@
     function prevChapter() { loadChapter(currentChapterIndex - 1); }
     function nextChapter() { loadChapter(currentChapterIndex + 1); }
 
-    // ===================== 工具函数 (增强清除缓存) =====================
-    function initDarkMode() { /* 保持不变 */
+    // ===================== 书架功能 =====================
+    function renderShelf() {
+      const shelfList = document.getElementById('shelfList');
+      if (shelfBooks.length === 0) {
+        shelfList.innerHTML = '<p style="color: var(--text-secondary);">暂无书籍</p>';
+        return;
+      }
+
+      shelfList.innerHTML = '';
+      shelfBooks.forEach(book => {
+        const item = document.createElement('div');
+        item.className = 'book-item';
+        item.onclick = () => openBookFromShelf(book);
+        item.innerHTML = `
+          <div class="book-cover">
+            <img src="${book.cover || 'https://via.placeholder.com/60x80?text=book'}" alt="${book.title}">
+          </div>
+          <div class="book-info">
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">作者：${book.author}</div>
+            <div class="book-progress">第 ${book.lastChapterIndex || 0} 章</div>
+          </div>
+        `;
+        shelfList.appendChild(item);
+      });
+    }
+
+    function addToShelf() {
+      if (!currentBook) return;
+
+      const existIndex = shelfBooks.findIndex(b => b.id === currentBook.id);
+      
+      const shelfBook = {
+        ...currentBook,
+        lastChapterIndex: currentChapterIndex,
+        lastChapterTitle: currentChapters[currentChapterIndex].title
+      };
+
+      if (existIndex > -1) {
+        shelfBooks[existIndex] = shelfBook;
+        showToast('已更新进度');
+      } else {
+        shelfBooks.push(shelfBook);
+        showToast('已加入书架');
+      }
+
+      localStorage.setItem('shelfBooks', JSON.stringify(shelfBooks));
+      renderShelf();
+    }
+
+    function openBookFromShelf(book) {
+      currentBook = book;
+      currentChapters = book.chapters || genChapters(book.title);
+      currentChapterIndex = book.lastChapterIndex || 0;
+      
+      renderCatalog();
+      loadChapter(currentChapterIndex);
+    }
+
+    // ===================== 工具函数 =====================
+    function initDarkMode() {
       if (isDarkMode) {
         document.body.classList.add('dark-mode');
         document.getElementById('darkModeToggle').classList.add('active');
       }
     }
 
-    function toggleDarkMode() { /* 保持不变 */
+    function toggleDarkMode() {
       isDarkMode = !isDarkMode;
       document.body.classList.toggle('dark-mode', isDarkMode);
       document.getElementById('darkModeToggle').classList.toggle('active', isDarkMode);
@@ -642,19 +942,20 @@
       showToast(isDarkMode ? '已开启夜间模式' : '已关闭夜间模式');
     }
 
-    function clearCache() { /* 增强：同时清除书架 */
-      if (confirm('警告：这将删除所有书源和书架数据，且无法恢复！')) {
+    function clearCache() {
+      if (confirm('警告：这将删除所有数据！')) {
         localStorage.removeItem('sources');
-        localStorage.removeItem('shelfBooks'); // 联动清除
+        localStorage.removeItem('shelfBooks');
         sources = [];
         shelfBooks = [];
+        booksCache = {};
         renderSources();
-        renderShelf(); // 联动刷新
+        renderShelf();
         showToast('缓存已清除');
       }
     }
 
-    function showToast(msg) { /* 保持不变 */
+    function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.innerText = msg;
       toast.classList.add('show');

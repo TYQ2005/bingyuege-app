@@ -1,0 +1,3 @@
+笔趣阁|https://api.example.com/books.json
+起点中文网|https://api.example.com/qidian.json
+网易文学|https://api.example.com/netease.json
