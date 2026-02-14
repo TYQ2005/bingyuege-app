@@ -212,6 +212,317 @@
       background: rgba(0,0,0,0.05);
       border-radius: 4px;
     }
+
+    /* ============ 增强的动画和过渡 ============ */
+    @keyframes slideUp {
+      from { 
+        transform: translateY(30px); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateY(0); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+      }
+      to { 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes slideDown {
+      from { 
+        transform: translateY(-30px); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateY(0); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes slideInRight {
+      from { 
+        transform: translateX(100%); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateX(0); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes slideInLeft {
+      from { 
+        transform: translateX(-100%); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateX(0); 
+        opacity: 1; 
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { 
+        opacity: 1; 
+      }
+      50% { 
+        opacity: 0.7; 
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% { 
+        transform: translateY(0); 
+      }
+      50% { 
+        transform: translateY(-10px); 
+      }
+    }
+
+    @keyframes fadeOut {
+      from { 
+        opacity: 1; 
+      }
+      to { 
+        opacity: 0; 
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes rotateIn {
+      from {
+        transform: rotate(-10deg);
+        opacity: 0;
+      }
+      to {
+        transform: rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -1000px 0;
+      }
+      100% {
+        background-position: 1000px 0;
+      }
+    }
+
+    @keyframes flip {
+      0% {
+        transform: perspective(400px) rotateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: perspective(400px) rotateY(360deg);
+        opacity: 1;
+      }
+    }
+
+    .page {
+      animation: slideUp 0.4s ease-out;
+    }
+
+    .page.active {
+      animation: slideUp 0.4s ease-out;
+    }
+
+    .modal {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal.show {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .card {
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .book-item {
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .book-item:active {
+      transform: scale(0.95);
+      background: rgba(37, 117, 252, 0.08);
+    }
+
+    .book-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:active {
+      transform: scale(0.92);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 117, 252, 0.3);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease-out, height 0.6s ease-out;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* 页面切换时的过渡 */
+    .page {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .page:not(.active) {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page.active {
+      opacity: 1;
+    }
+
+    /* 列表项的动画 */
+    .source-item, .book-item, .catalog-item {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .source-item:hover, .catalog-item:hover {
+      background: rgba(37, 117, 252, 0.08);
+      padding-left: 5px;
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    /* 加载动画增强 */
+    .loading {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .loading::after {
+      animation: spin 1.5s linear infinite;
+    }
+
+    /* 快速反馈 */
+    .toast {
+      animation: slideUp 0.3s ease-out;
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .toast.show {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    /* 阅读器增强 */
+    .reader-content {
+      animation: slideInLeft 0.4s ease-out;
+    }
+
+    .reader-toolbar {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .reader-tool {
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .reader-tool:active {
+      transform: scale(0.85);
+      color: var(--primary);
+    }
+
+    .reader-tool:hover {
+      transform: scale(1.1);
+    }
+
+    /* 输入框焦点效果 */
+    .form-control {
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(37, 117, 252, 0.3);
+      outline: none;
+      transform: scale(1.02);
+    }
+
+    /* 下拉菜单增强 */
+    select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5em;
+    }
+
+    /* ADD按钮增强动画 */
+    .add-btn {
+      animation: scaleIn 0.4s ease-out;
+    }
+
+    .add-btn:hover {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .add-btn:active {
+      transform: rotate(90deg) scale(0.95);
+    }
+
+    /* 目录项过渡 */
+    .catalog-item.current {
+      animation: pulse 0.5s ease-out;
+    }
+
+    /* 开关动画 */
+    .toggle {
+      animation: scaleIn 0.3s ease-out;
+    }
+
+    .toggle.active {
+      animation: rotateIn 0.3s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -408,57 +719,233 @@
     let currentChapterIndex = 0;
     let shelfBooks = JSON.parse(localStorage.getItem('shelfBooks') || '[]');
     let booksCache = {};
+    let passive = { passive: true };
 
     // ===================== 初始化 =====================
     window.onload = function() {
       renderSources();
       renderShelf();
       initDarkMode();
+      setupGestureHandlers();
+      setupKeyboardShortcuts();
+      loadProgressTracking();
     };
+
+    // ===================== 手势处理 =====================
+    function setupGestureHandlers() {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+
+      document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+      }, passive);
+
+      document.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchEndTime = Date.now();
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+        const duration = touchEndTime - touchStartTime;
+
+        // 水平滑动检验（快速滑动）
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50 && duration < 500) {
+          if (diffX > 0) {
+            // 向右滑动 - 上一章
+            if (document.getElementById('pageReader').classList.contains('active')) {
+              prevChapter();
+            }
+          } else {
+            // 向左滑动 - 下一章
+            if (document.getElementById('pageReader').classList.contains('active')) {
+              nextChapter();
+            }
+          }
+        }
+      }, passive);
+
+      // 处理长按
+      document.addEventListener('touchstart', (e) => {
+        const target = e.target;
+        if (target.classList.contains('book-item') || target.closest('.book-item')) {
+          const longPressTimer = setTimeout(() => {
+            showToast('💡 提示：点击打开书籍，左右滑动翻页');
+          }, 1000);
+          
+          target.addEventListener('touchend', () => clearTimeout(longPressTimer), { once: true });
+        }
+      }, passive);
+    }
+
+    // ===================== 键盘快捷键 =====================
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        const isReader = document.getElementById('pageReader').classList.contains('active');
+        const isCatalog = document.getElementById('pageCatalog').classList.contains('active');
+        const isModal = document.getElementById('modal').classList.contains('show') || 
+                       document.getElementById('importModal').classList.contains('show');
+        
+        // 避免在模态框中处理快捷键
+        if (isModal) return;
+        
+        if (isReader || isCatalog) {
+          if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+            e.preventDefault();
+            prevChapter();
+          } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+            e.preventDefault();
+            nextChapter();
+          } else if (e.key === 'Escape' || e.key === 'q' || e.key === 'Q') {
+            if (isReader) {
+              switchPage('pageCatalog');
+            } else {
+              switchPage('pageReader');
+            }
+          } else if (e.key === ' ') {
+            // 空格翻页
+            e.preventDefault();
+            nextChapter();
+          } else if (e.key === 'b' || e.key === 'B') {
+            // B 键加书架
+            addToShelf();
+          }
+        }
+      });
+    }
+
+    // ===================== 进度跟踪 =====================
+    function loadProgressTracking() {
+      const progress = JSON.parse(localStorage.getItem('readingProgress') || '{}');
+      window.readingProgress = progress;
+    }
+
+    function saveReadingProgress() {
+      if (currentBook && currentChapters.length > 0) {
+        window.readingProgress[currentBook.id] = {
+          bookTitle: currentBook.title,
+          chapterIndex: currentChapterIndex,
+          chapterTitle: currentChapters[currentChapterIndex]?.title,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('readingProgress', JSON.stringify(window.readingProgress));
+      }
+    }
 
     // ===================== 页面切换 =====================
     function switchPage(pageId) {
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
+      const pages = document.querySelectorAll('.page');
+      const targetPage = document.getElementById(pageId);
+      let activePage = null;
       
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.onclick.toString().includes(pageId)) {
-          item.classList.add('active');
+      // 找到当前活跃页面
+      pages.forEach(page => {
+        if (page.classList.contains('active')) {
+          activePage = page;
         }
       });
       
+      // 如果已经在该页面，则不切换
+      if (activePage === targetPage) return;
+      
+      // 处理退出动画
+      if (activePage) {
+        activePage.style.animation = 'slideDown 0.3s ease-out forwards';
+        activePage.style.pointerEvents = 'none';
+      }
+      
+      // 处理进入动画
+      setTimeout(() => {
+        pages.forEach(page => {
+          page.classList.remove('active');
+          page.style.animation = '';
+          page.style.pointerEvents = '';
+        });
+        targetPage.classList.add('active');
+        targetPage.style.animation = 'slideUp 0.4s ease-out';
+        
+        // 在某些页面上应用不同的动画
+        if (pageId === 'pageReader') {
+          targetPage.style.animation = 'slideInLeft 0.4s ease-out';
+        } else if (pageId === 'pageCatalog') {
+          targetPage.style.animation = 'slideInRight 0.4s ease-out';
+        }
+      }, 100);
+      
+      // 更新导航栏
+      updateNavBar(pageId);
+      updateTopBar(pageId);
+      
+      // 触发页面进入事件
+      if (pageId === 'pageShelf') renderShelf();
+      if (pageId === 'pageMore') initSettings();
+    }
+
+    function updateNavBar(pageId) {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        const isActive = item.querySelector('span').textContent.includes(getPageLabel(pageId));
+        item.classList.toggle('active', isActive);
+        if (isActive) {
+          item.style.animation = 'bounce 0.4s ease-out';
+        }
+      });
+    }
+
+    function updateTopBar(pageId) {
+      const topBar = document.querySelector('.top-bar');
       const titles = {
-        'pageSource': '冰阅 · 书源管理',
-        'pageShelf': '冰阅 · 我的书架',
-        'pageBooks': '冰阅 · 书籍列表',
-        'pageReader': '冰阅 · 阅读器',
-        'pageCatalog': '冰阅 · 章节列表',
-        'pageMore': '冰阅 · 更多功能'
+        'pageSource': '📖 冰阅 · 书源管理',
+        'pageShelf': '📚 冰阅 · 我的书架',
+        'pageBooks': '🔍 冰阅 · 书籍列表',
+        'pageReader': '📖 冰阅 · 阅读中',
+        'pageCatalog': '☰ 冰阅 · 章节目录',
+        'pageMore': '⚙️ 冰阅 · 更多功能'
       };
-      document.querySelector('.top-bar').innerText = titles[pageId];
+      
+      topBar.style.opacity = '0.5';
+      topBar.style.transition = 'opacity 0.2s ease';
+      
+      setTimeout(() => {
+        topBar.innerText = titles[pageId] || '冰阅';
+        topBar.style.opacity = '1';
+      }, 100);
+    }
+
+    function getPageLabel(pageId) {
+      const labels = {
+        'pageSource': '书源',
+        'pageShelf': '书架',
+        'pageBooks': '书籍',
+        'pageCatalog': '目录',
+        'pageMore': '更多'
+      };
+      return labels[pageId] || '';
     }
 
     // ===================== 书源管理 =====================
     function renderSources() {
       const sourceList = document.getElementById('sourceList');
       if (sources.length === 0) {
-        sourceList.innerHTML = '<p style="color: var(--text-secondary);">暂无书源，点击导入或新增</p>';
+        sourceList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 30px 0;">📥 暂无书源，点击导入或新增</p>';
         return;
       }
       sourceList.innerHTML = '';
-      sources.forEach(source => {
+      sources.forEach((source, index) => {
         const item = document.createElement('div');
         item.className = 'source-item';
+        item.style.animation = `slideUp 0.3s ease-out ${index * 50}ms both`;
         item.onclick = () => loadBooksFromSource(source);
+        
         item.innerHTML = `
-          <div>
-            <strong>${source.name}</strong>
-            <p style="font-size: 12px; color: var(--text-secondary);">${source.url}</p>
+          <div style="flex: 1;">
+            <strong style="font-size: 14px;">${source.name}</strong>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; word-break: break-all;">${source.url}</p>
           </div>
-          <div style="display: flex; gap: 5px;">
-            <button class="btn btn-secondary" onclick="event.stopPropagation(); editSource('${source.id}')" style="padding: 5px 10px; font-size: 12px;">编辑</button>
-            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteSource('${source.id}')" style="padding: 5px 10px; font-size: 12px;">删除</button>
+          <div style="display: flex; gap: 5px; flex-shrink: 0; margin-left: 10px;">
+            <button class="btn btn-secondary" onclick="event.stopPropagation(); editSource('${source.id}')" style="padding: 5px 10px; font-size: 12px;">✏️</button>
+            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteSource('${source.id}')" style="padding: 5px 10px; font-size: 12px;">🗑️</button>
           </div>
         `;
         sourceList.appendChild(item);
@@ -471,11 +958,24 @@
       document.getElementById('sourceId').value = '';
       document.getElementById('sourceName').value = '';
       document.getElementById('sourceUrl').value = '';
-      document.getElementById('modal').classList.add('show');
+      
+      const modal = document.getElementById('modal');
+      modal.classList.add('show');
+      
+      // 聚焦第一个输入框
+      setTimeout(() => {
+        document.getElementById('sourceName').focus();
+      }, 300);
     }
 
     function closeModal() {
-      document.getElementById('modal').classList.remove('show');
+      const modal = document.getElementById('modal');
+      modal.style.animation = 'fadeOut 0.3s ease-out forwards';
+      
+      setTimeout(() => {
+        modal.classList.remove('show');
+        modal.style.animation = '';
+      }, 300);
     }
 
     function saveSource() {
@@ -529,11 +1029,23 @@
       document.getElementById('textInput').value = '';
       document.getElementById('sourceDataUrl').value = '';
       document.getElementById('importStatus').style.display = 'none';
-      document.getElementById('importModal').classList.add('show');
+      
+      const modal = document.getElementById('importModal');
+      modal.classList.add('show');
+      
+      setTimeout(() => {
+        document.getElementById('jsonInput').focus();
+      }, 300);
     }
 
     function closeImportModal() {
-      document.getElementById('importModal').classList.remove('show');
+      const modal = document.getElementById('importModal');
+      modal.style.animation = 'fadeOut 0.3s ease-out forwards';
+      
+      setTimeout(() => {
+        modal.classList.remove('show');
+        modal.style.animation = '';
+      }, 300);
     }
 
     function updateImportUI() {
@@ -548,7 +1060,9 @@
       const type = document.getElementById('importType').value;
       const statusEl = document.getElementById('importStatus');
       statusEl.style.display = 'block';
-      statusEl.innerText = '处理中...';
+      statusEl.innerText = '⏳ 处理中...';
+      statusEl.style.color = 'var(--text-secondary)';
+      statusEl.style.animation = 'pulse 1.5s ease-in-out infinite';
 
       try {
         let importedSources = [];
@@ -569,6 +1083,7 @@
         }
 
         // 添加导入的书源
+        let addedCount = 0;
         importedSources.forEach(src => {
           if (src.name && src.url) {
             sources.push({
@@ -576,15 +1091,25 @@
               name: src.name || src.title || '未知',
               url: src.url || src.link || ''
             });
+            addedCount++;
           }
         });
 
         localStorage.setItem('sources', JSON.stringify(sources));
         renderSources();
-        closeImportModal();
-        showToast(`成功导入 ${importedSources.length} 个书源`);
+        
+        statusEl.style.animation = '';
+        statusEl.style.color = '#27ae60';
+        statusEl.innerText = `✓ 成功导入 ${addedCount} 个书源`;
+        
+        setTimeout(() => {
+          closeImportModal();
+          showToast(`✓ 成功导入 ${addedCount} 个书源`);
+        }, 1500);
       } catch (error) {
-        statusEl.innerText = '❌ ' + error.message;
+        statusEl.style.animation = '';
+        statusEl.style.color = '#dc3545';
+        statusEl.innerText = '❌ ' + (error.message || '导入失败');
       }
     }
 
@@ -706,18 +1231,23 @@
       document.getElementById('sourceBookTitle').innerText = `${currentSource.name} - ${books.length}本书`;
       bookList.innerHTML = '';
       
-      books.forEach(book => {
+      books.forEach((book, index) => {
         const item = document.createElement('div');
         item.className = 'book-item';
+        
+        // 添加延迟动画
+        item.style.animation = `slideUp 0.3s ease-out ${index * 50}ms both`;
         item.onclick = () => openBook(book);
         
         const title = book.title || book.name || '未知书名';
         const author = book.author || book.writer || '未知作者';
         const cover = book.cover || book.image || book.img || 'https://via.placeholder.com/60x80?text=no+cover';
         
+        // 添加加载中的占位符
         item.innerHTML = `
-          <div class="book-cover">
-            <img src="${cover}" alt="${title}" onerror="this.src='https://via.placeholder.com/60x80?text=book'">
+          <div class="book-cover" style="position: relative;">
+            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.1); border-radius: 4px; animation: pulse 1.5s ease-in-out infinite;"></div>
+            <img src="${cover}" alt="${title}" onerror="this.src='https://via.placeholder.com/60x80?text=book'" loading="lazy">
           </div>
           <div class="book-info">
             <div class="book-title">${title}</div>
@@ -833,17 +1363,23 @@
       const catalogList = document.getElementById('catalogList');
       document.getElementById('catalogBookTitle').innerText = currentBook.title;
       
-      let html = '';
+      catalogList.innerHTML = '';
       currentChapters.forEach((chapter, index) => {
-        html += `<div class="catalog-item ${index === currentChapterIndex ? 'current' : ''}" onclick="loadChapter(${index})">${chapter.title}</div>`;
+        const item = document.createElement('div');
+        item.className = `catalog-item ${index === currentChapterIndex ? 'current' : ''}`;
+        item.style.animation = `slideUp 0.3s ease-out ${index * 30}ms both`;
+        item.textContent = chapter.title;
+        item.onclick = () => loadChapter(index);
+        
+        // 添加过渡效果
+        item.style.transition = 'all 0.2s ease';
+        catalogList.appendChild(item);
       });
-      
-      catalogList.innerHTML = html;
     }
 
     function loadChapter(index) {
       if (index < 0 || index >= currentChapters.length) {
-        showToast(index < 0 ? '已是第一章' : '已是最后一章');
+        showToast(index < 0 ? '⬅️ 已是第一章' : '➡️ 已是最后一章', 1500, 'warning');
         return;
       }
 
@@ -851,17 +1387,44 @@
       const chapter = currentChapters[index];
       
       const readerContent = document.getElementById('readerContent');
-      readerContent.innerHTML = `
-        <h3 style="text-align: center; margin-bottom: 20px;">${chapter.title}</h3>
-        <p>${chapter.content.replace(/\n/g, '</p><p>')}</p>
-      `;
       
+      // 添加淡出动画
+      readerContent.style.opacity = '0.3';
+      readerContent.style.transform = 'scale(0.98)';
+      readerContent.style.transition = 'all 0.2s ease';
+      
+      setTimeout(() => {
+        readerContent.innerHTML = `
+          <h3 style="text-align: center; margin-bottom: 20px; font-size: 18px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">${chapter.title}</h3>
+          <div style="text-align: center; font-size: 12px; color: var(--text-secondary); margin-bottom: 30px;">第 ${index + 1} 章 / 共 ${currentChapters.length} 章</div>
+          <p style="text-indent: 2em; line-height: 2;">${chapter.content.replace(/\n/g, '</p><p style="text-indent: 2em; line-height: 2;">')}</p>
+        `;
+        
+        // 淡入和放大动画
+        readerContent.style.opacity = '1';
+        readerContent.style.transform = 'scale(1)';
+        readerContent.style.animation = 'slideInLeft 0.4s ease-out';
+      }, 150);
+      
+      // 更新目录高亮
       document.querySelectorAll('.catalog-item').forEach((item, i) => {
         item.classList.remove('current');
-        if (i === index) item.classList.add('current');
+        if (i === index) {
+          item.classList.add('current');
+          item.style.animation = 'pulse 0.5s ease-out';
+          // 自动滚动到当前章节
+          setTimeout(() => {
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        }
       });
 
-      switchPage('pageReader');
+      // 保存阅读进度
+      saveReadingProgress();
+      
+      // 显示进度提示
+      const progress = Math.round(((index + 1) / currentChapters.length) * 100);
+      showToast(`📖 进度: ${progress}%`, 1500, 'info');
     }
 
     function prevChapter() { loadChapter(currentChapterIndex - 1); }
@@ -871,23 +1434,38 @@
     function renderShelf() {
       const shelfList = document.getElementById('shelfList');
       if (shelfBooks.length === 0) {
-        shelfList.innerHTML = '<p style="color: var(--text-secondary);">暂无书籍</p>';
+        shelfList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px 0;">📚 暂无书籍，去添加吧</p>';
         return;
       }
 
       shelfList.innerHTML = '';
-      shelfBooks.forEach(book => {
+      
+      // 按最后阅读时间排序
+      const sortedBooks = [...shelfBooks].sort((a, b) => {
+        return (b.lastReadTime || 0) - (a.lastReadTime || 0);
+      });
+
+      sortedBooks.forEach((book, index) => {
         const item = document.createElement('div');
         item.className = 'book-item';
+        item.style.animation = `slideUp 0.3s ease-out ${index * 50}ms both`;
         item.onclick = () => openBookFromShelf(book);
+        
+        // 计算阅读进度百分比
+        const maxChapters = book.chapters?.length || 1;
+        const progress = Math.round(((book.lastChapterIndex || 0) / maxChapters) * 100);
+        
         item.innerHTML = `
           <div class="book-cover">
-            <img src="${book.cover || 'https://via.placeholder.com/60x80?text=book'}" alt="${book.title}">
+            <img src="${book.cover || 'https://via.placeholder.com/60x80?text=book'}" alt="${book.title}" loading="lazy">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(0,0,0,0.2);">
+              <div style="height: 100%; width: ${progress}%; background: var(--primary); transition: width 0.3s ease;"></div>
+            </div>
           </div>
-          <div class="book-info">
+          <div class="book-info" style="flex: 1;">
             <div class="book-title">${book.title}</div>
             <div class="book-author">作者：${book.author}</div>
-            <div class="book-progress">第 ${book.lastChapterIndex || 0} 章</div>
+            <div class="book-progress">第 ${book.lastChapterIndex || 0} 章 · ${progress}%</div>
           </div>
         `;
         shelfList.appendChild(item);
@@ -895,22 +1473,26 @@
     }
 
     function addToShelf() {
-      if (!currentBook) return;
+      if (!currentBook) {
+        showToast('❌ 尚未打开书籍', 1500, 'warning');
+        return;
+      }
 
       const existIndex = shelfBooks.findIndex(b => b.id === currentBook.id);
       
       const shelfBook = {
         ...currentBook,
         lastChapterIndex: currentChapterIndex,
-        lastChapterTitle: currentChapters[currentChapterIndex].title
+        lastChapterTitle: currentChapters[currentChapterIndex]?.title,
+        lastReadTime: Date.now()
       };
 
       if (existIndex > -1) {
         shelfBooks[existIndex] = shelfBook;
-        showToast('已更新进度');
+        showToast('✓ 已更新书架进度', 1500, 'success');
       } else {
         shelfBooks.push(shelfBook);
-        showToast('已加入书架');
+        showToast('✓ 已添加到书架', 1500, 'success');
       }
 
       localStorage.setItem('shelfBooks', JSON.stringify(shelfBooks));
@@ -926,11 +1508,13 @@
       loadChapter(currentChapterIndex);
     }
 
-    // ===================== 工具函数 =====================
-    function initDarkMode() {
-      if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-        document.getElementById('darkModeToggle').classList.add('active');
+    // ===================== 设置功能 =====================
+    function initSettings() {
+      const settingsPanel = document.getElementById('pageMore');
+      // 初始化设置页面中的元素
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      if (darkModeToggle) {
+        darkModeToggle.classList.toggle('active', isDarkMode);
       }
     }
 
@@ -939,29 +1523,64 @@
       document.body.classList.toggle('dark-mode', isDarkMode);
       document.getElementById('darkModeToggle').classList.toggle('active', isDarkMode);
       localStorage.setItem('darkMode', isDarkMode);
-      showToast(isDarkMode ? '已开启夜间模式' : '已关闭夜间模式');
+      showToast(isDarkMode ? '🌙 已开启夜间模式' : '☀️ 已关闭夜间模式', 1500, 'success');
+      
+      // 添加过渡动画
+      document.body.style.transition = 'background 0.3s ease, color 0.3s ease';
     }
 
     function clearCache() {
-      if (confirm('警告：这将删除所有数据！')) {
+      if (confirm('⚠️ 警告：这将删除所有书籍、书源和阅读进度！确定吗？')) {
         localStorage.removeItem('sources');
         localStorage.removeItem('shelfBooks');
+        localStorage.removeItem('readingProgress');
+        localStorage.removeItem('darkMode');
         sources = [];
         shelfBooks = [];
         booksCache = {};
+        window.readingProgress = {};
+        isDarkMode = false;
+        
         renderSources();
         renderShelf();
-        showToast('缓存已清除');
+        initDarkMode();
+        
+        showToast('✓ 缓存已清除，应用将刷新', 1500, 'success');
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
       }
     }
 
-    function showToast(msg) {
+    function showToast(msg, duration = 2500, type = 'info') {
       const toast = document.getElementById('toast');
+      
+      // 清除之前的超时
+      if (toast.timeoutId) {
+        clearTimeout(toast.timeoutId);
+      }
+      if (toast.hideTimeoutId) {
+        clearTimeout(toast.hideTimeoutId);
+      }
+      
+      // 设置样式根据类型
+      toast.style.background = {
+        'success': '#27ae60',
+        'error': '#dc3545',
+        'warning': '#f39c12',
+        'info': 'rgba(0,0,0,0.7)'
+      }[type] || 'rgba(0,0,0,0.7)';
+      
       toast.innerText = msg;
       toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2000);
+      toast.style.animation = 'slideUp 0.3s ease-out';
+      
+      toast.timeoutId = setTimeout(() => {
+        toast.style.animation = 'slideDown 0.3s ease-out forwards';
+        toast.hideTimeoutId = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 300);
+      }, duration);
     }
   </script>
 </body>
