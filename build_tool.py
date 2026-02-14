@@ -73,10 +73,14 @@ class BingyuegeBuilder:
         
         return config
     
-    def _run_command(self, cmd: List[str], cwd: Optional[Path] = None, 
+    def _run_command(self, cmd, cwd: Optional[Path] = None, 
                      capture: bool = False, show_output: bool = True) -> Optional[str]:
-        """运行命令"""
+        """运行命令 (支持字符串和列表)"""
         try:
+            # 支持字符串命令（自动split）
+            if isinstance(cmd, str):
+                cmd = cmd.split()
+            
             if show_output:
                 print(f"▶ {' '.join(cmd)}")
             
@@ -85,12 +89,14 @@ class BingyuegeBuilder:
                 cwd=cwd or self.project_dir,
                 capture_output=capture,
                 text=True,
-                timeout=600
+                timeout=600,
+                shell=False
             )
             
             if result.returncode != 0:
                 if result.stderr:
-                    print(f"❌ 错误: {result.stderr[:200]}")
+                    error_msg = result.stderr[:200]
+                    print(f"❌ 错误: {error_msg}")
                 return None
             
             if capture and result.stdout:
@@ -98,6 +104,9 @@ class BingyuegeBuilder:
             return "success"
         except subprocess.TimeoutExpired:
             print(f"❌ 命令超时")
+            return None
+        except FileNotFoundError as e:
+            print(f"❌ 命令未找到: {cmd[0] if cmd else '未知'}")
             return None
         except Exception as e:
             print(f"❌ 错误: {str(e)}")
@@ -162,12 +171,12 @@ class BingyuegeBuilder:
         
         return True
     
-    def get_cordova_cmd(self) -> str:
-        """获取 Cordova 命令"""
+    def get_cordova_cmd(self) -> List[str]:
+        """获取 Cordova 命令 (返回列表)"""
         if shutil.which("cordova"):
-            return "cordova"
+            return ["cordova"]
         else:
-            return "npx cordova"
+            return ["npx", "cordova"]
     
     def init_cordova(self) -> bool:
         """初始化 Cordova 项目"""
@@ -178,7 +187,8 @@ class BingyuegeBuilder:
         # 添加 Android 平台
         if not self.android_dir.exists():
             print("  📱 添加 Android 平台...")
-            result = self._run_command([cordova_cmd, "platform", "add", "android@latest"])
+            cmd = cordova_cmd + ["platform", "add", "android@latest"]
+            result = self._run_command(cmd)
             if not result:
                 return False
             print("  ✓ Android 平台已添加")
@@ -186,7 +196,8 @@ class BingyuegeBuilder:
             print("  ✓ Android 平台已存在")
             # 更新平台
             print("  🔄 更新 Android 平台...")
-            self._run_command([cordova_cmd, "platform", "update", "android@latest"], show_output=False)
+            cmd = cordova_cmd + ["platform", "update", "android@latest"]
+            self._run_command(cmd, show_output=False)
         
         return True
     
@@ -195,7 +206,8 @@ class BingyuegeBuilder:
         print("\n🔨 构建 Debug APK...")
         
         cordova_cmd = self.get_cordova_cmd()
-        result = self._run_command([cordova_cmd, "build", "android", "--debug"])
+        cmd = cordova_cmd + ["build", "android", "--debug"]
+        result = self._run_command(cmd)
         if not result:
             print("  ❌ Debug APK 构建失败")
             return False
@@ -224,7 +236,8 @@ class BingyuegeBuilder:
         print("\n🔨 构建 Release APK...")
         
         cordova_cmd = self.get_cordova_cmd()
-        result = self._run_command([cordova_cmd, "build", "android", "--release"])
+        cmd = cordova_cmd + ["build", "android", "--release"]
+        result = self._run_command(cmd)
         if not result:
             print("  ❌ Release APK 构建失败")
             return False
