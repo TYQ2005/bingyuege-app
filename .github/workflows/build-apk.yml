@@ -20,8 +20,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set JAVA_HOME to JDK 17
-        run: echo "JAVA_HOME=${{ steps.setup-java.outputs.path }}" >> $GITHUB_ENV
+      # 强制覆盖 JAVA_HOME，确保所有后续命令都使用 JDK 17
+      - name: Override JAVA_HOME
+        run: |
+          echo "JAVA_HOME=${{ steps.setup-java.outputs.path }}" >> $GITHUB_ENV
+          echo "JDK_17_HOME=${{ steps.setup-java.outputs.path }}" >> $GITHUB_ENV
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -34,8 +37,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Accept Android SDK licenses
+      # 直接使用预安装的 SDK，并手动接受许可证，确保使用 JDK 17
+      - name: Accept Android SDK Licenses
         run: |
+          export JAVA_HOME=${{ steps.setup-java.outputs.path }}
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Add Android platform
@@ -61,6 +66,17 @@ jobs:
           release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
+
+      - name: Upload APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.APK_PATH }}
+          asset_name: ${{ env.APK_NAME }}
+          asset_content_type: application/vnd.android.package-archive
+
 
       - name: Upload APK to Release
         uses: actions/upload-release-asset@v1
